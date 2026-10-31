@@ -59,6 +59,22 @@
       transition: background .15s;
     }
     .link-btn:hover { background: #174A96; }
+    .copy-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #2A3038;
+      border: 1px solid #3d4a58;
+      color: #A3ADBA;
+      cursor: pointer;
+      transition: background .15s, color .15s;
+    }
+    .copy-btn:hover { background: #374151; color: #F2F4F6; }
+    .copy-btn.copied { color: #34d399; border-color: #34d399; }
     /* sticky header */
     thead th { position: sticky; top: 0; z-index: 10; }
     /* scrollbar */
@@ -320,7 +336,10 @@ function renderRows() {
       <td class="px-4 py-2.5 wrap">${r.materias.map(m => `<span class="badge">${esc(m)}</span>`).join('')}</td>
       <td class="px-4 py-2.5">
         ${r.link
-          ? `<a href="${esc(r.link)}" target="_blank" rel="noopener" class="link-btn"><i class="fa fa-external-link-alt text-[10px]"></i> Abrir</a>`
+          ? `<div class="flex items-center gap-1.5">
+              <a href="${esc(r.link)}" target="_blank" rel="noopener" class="link-btn"><i class="fa fa-external-link-alt text-[10px]"></i> Abrir</a>
+              <button class="copy-btn" data-url="${esc(r.link)}" title="Copiar link"><i class="fa fa-copy text-[10px]"></i> Copiar</button>
+             </div>`
           : '<span class="text-mist text-xs">Em breve</span>'}
       </td>
     </tr>`).join('');
@@ -380,6 +399,36 @@ async function init() {
     el.textContent = err.message;
     el.classList.remove('hidden');
   }
+}
+
+// ── Copiar link ───────────────────────────────────────────────────────────
+document.getElementById('tbody').addEventListener('click', e => {
+  const btn = e.target.closest('.copy-btn');
+  if (!btn) return;
+  const url = btn.dataset.url;
+  const done = () => {
+    btn.classList.add('copied');
+    btn.innerHTML = '<i class="fa fa-check text-[10px]"></i> Copiado';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      btn.innerHTML = '<i class="fa fa-copy text-[10px]"></i> Copiar';
+    }, 2000);
+  };
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url).then(done).catch(() => legacyCopy(url, done));
+  } else {
+    legacyCopy(url, done);
+  }
+});
+
+function legacyCopy(url, done) {
+  const ta = document.createElement('textarea');
+  ta.value = url;
+  ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy'); done(); } catch (_) { window.prompt('Copie o link:', url); }
+  document.body.removeChild(ta);
 }
 
 init();
