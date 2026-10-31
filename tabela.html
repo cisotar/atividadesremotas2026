@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabela de Simulados – SARESP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            ink:   '#0E0F12',
+            page:  '#1B1F26',
+            panel: '#2A3038',
+            brand: { DEFAULT: '#1F5FBF', 700: '#174A96' },
+            mist:  '#A3ADBA',
+            snow:  '#F2F4F6',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background: #1B1F26; color: #F2F4F6; }
+    th { user-select: none; }
+    th.sortable { cursor: pointer; }
+    th.sortable:hover { background: #374151; }
+    th.sort-asc  .sort-icon::after { content: ' ▲'; }
+    th.sort-desc .sort-icon::after { content: ' ▼'; }
+    tr:hover td { background: #323a44; }
+    td, th { white-space: nowrap; }
+    td.wrap { white-space: normal; min-width: 140px; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: #1F5FBF22;
+      border: 1px solid #1F5FBF55;
+      color: #93c5fd;
+      margin: 1px 2px;
+    }
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: #1F5FBF;
+      color: #fff;
+      text-decoration: none;
+      transition: background .15s;
+    }
+    .link-btn:hover { background: #174A96; }
+    /* sticky header */
+    thead th { position: sticky; top: 0; z-index: 10; }
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #1B1F26; }
+    ::-webkit-scrollbar-thumb { background: #3d4a58; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen font-sans flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-ink border-b border-mist/10 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <a href="index.html" class="text-mist hover:text-snow transition-colors text-sm flex items-center gap-1">
+        <i class="fa fa-arrow-left text-xs"></i> App
+      </a>
+      <h1 class="text-lg font-bold text-snow">Tabela de Simulados</h1>
+      <span id="badge-count" class="bg-brand text-white text-xs font-semibold px-2 py-0.5 rounded-full hidden"></span>
+    </div>
+    <!-- Filtros rápidos -->
+    <div class="flex items-center gap-2 flex-wrap">
+      <input id="search" type="text" placeholder="Buscar em qualquer coluna…"
+        class="bg-panel text-snow placeholder-mist border border-mist/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand w-56">
+      <select id="sel-nivel" class="bg-panel text-snow border border-mist/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand">
+        <option value="">Todos os níveis</option>
+        <option value="Ensino Fundamental">Ensino Fundamental</option>
+        <option value="Ensino Médio">Ensino Médio</option>
+      </select>
+      <select id="sel-serie" class="bg-panel text-snow border border-mist/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand">
+        <option value="">Todas as séries</option>
+      </select>
+      <button id="btn-reset" class="text-mist hover:text-snow text-sm flex items-center gap-1 px-2 py-1.5 rounded hover:bg-panel transition-colors">
+        <i class="fa fa-times-circle text-xs"></i> Limpar
+      </button>
+    </div>
+  </header>
+
+  <!-- Tabela -->
+  <main class="flex-grow overflow-auto px-4 py-6">
+    <div id="loading" class="text-mist text-sm text-center py-20">
+      <i class="fa fa-spinner fa-spin mr-2"></i>Carregando calendário…
+    </div>
+    <div id="error" class="hidden text-red-400 text-sm text-center py-20"></div>
+
+    <div id="table-wrap" class="hidden overflow-auto rounded-xl border border-mist/15">
+      <table class="w-full text-sm border-collapse">
+        <thead class="bg-ink text-mist text-left">
+          <tr id="thead-row"></tr>
+        </thead>
+        <tbody id="tbody" class="divide-y divide-mist/10 bg-page"></tbody>
+      </table>
+    </div>
+    <p id="no-results" class="hidden text-mist text-sm text-center py-20">Nenhum resultado encontrado.</p>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-panel border-t border-mist/20 px-6 py-3 text-xs text-mist flex items-center justify-between">
+    <p>Feito com carinho pelo Professor Tarciso para a equipe da Escola Estadual Professora Mathilde Teixeira de Moraes.</p>
+    <span class="flex items-center gap-1"><i class="fab fa-google text-[10px]"></i> Google Forms Integrado</span>
+  </footer>
+
+<script>
+// ── Configuração de colunas ────────────────────────────────────────────────
+const COLS = [
+  { key: 'nivel',       label: 'Nível',       cls: 'px-4 py-2', sortType: 'str' },
+  { key: 'data',        label: 'Data',        cls: 'px-4 py-2', sortType: 'date' },
+  { key: 'dia',         label: 'Dia',         cls: 'px-4 py-2', sortType: 'dia' },
+  { key: 'serie',       label: 'Série',       cls: 'px-4 py-2', sortType: 'str' },
+  { key: 'modalidade',  label: 'Modalidade',  cls: 'px-4 py-2', sortType: 'str' },
+  { key: 'prova',       label: 'Prova',       cls: 'px-4 py-2 wrap', sortType: 'str' },
+  { key: 'materias',    label: 'Matéria(s)',  cls: 'px-4 py-2 wrap', sortType: 'str' },
+  { key: 'link',        label: 'Link',        cls: 'px-4 py-2', sortType: 'none' },
+];
+
+const SOURCES = [
+  'CALENDARIO.md',
+  'https://raw.githubusercontent.com/cisotar/atividadesremotas2026/main/CALENDARIO.md'
+];
+
+// ── Estado ────────────────────────────────────────────────────────────────
+let allRows = [];
+let sortCol = 'dia';
+let sortDir = 'asc';
+let filterNivel = '';
+let filterSerie = '';
+let filterSearch = '';
+
+// ── Utilitários ──────────────────────────────────────────────────────────
+function esc(s) {
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function norm(s) {
+  return String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+}
+
+function diaNum(diaStr) {
+  const m = String(diaStr).match(/\d+/);
+  return m ? parseInt(m[0], 10) : 0;
+}
+
+function dateVal(dataStr) {
+  const m = String(dataStr).match(/(\d{2})\.(\d{2})/);
+  if (!m) return 0;
+  return parseInt(m[2], 10) * 100 + parseInt(m[1], 10);
+}
+
+// ── Parser ────────────────────────────────────────────────────────────────
+function parseCalendar(md) {
+  const rows = [];
+  let nivel = '';
+
+  const lines = md.split('\n');
+  let headerCols = [];
+
+  for (const raw of lines) {
+    const line = raw.trim();
+
+    // Detecta nível pelo heading
+    if (/^##\s/.test(line)) {
+      const t = norm(line);
+      if (t.includes('fundamental')) nivel = 'Ensino Fundamental';
+      else if (t.includes('m') && (t.includes('dio') || t.includes('dio'))) nivel = 'Ensino Médio';
+      headerCols = [];
+      continue;
+    }
+
+    // Linha separadora
+    if (/^\|[-| ]+\|$/.test(line)) continue;
+
+    // Linha de tabela
+    if (line.startsWith('|')) {
+      const cells = line.split('|').slice(1, -1).map(c => c.trim());
+
+      // Detecta cabeçalho
+      const firstNorm = norm(cells[0] ?? '');
+      if (firstNorm === 'data' || firstNorm === 'dia') {
+        headerCols = cells.map(c => norm(c).replace(/\s+/g,''));
+        continue;
+      }
+
+      if (!headerCols.length) continue;
+
+      const get = key => {
+        const idx = headerCols.indexOf(key);
+        return idx >= 0 ? cells[idx] ?? '' : '';
+      };
+
+      const link = get('link');
+      const materiaRaw = get('materia');
+
+      rows.push({
+        nivel,
+        data:       get('data'),
+        dia:        get('dia'),
+        serie:      get('serie'),
+        modalidade: get('modalidade'),
+        prova:      get('prova'),
+        materias:   materiaRaw.split(',').map(s => s.trim()).filter(Boolean),
+        link:       /^https?:\/\//i.test(link) ? link : '',
+      });
+    }
+  }
+  return rows;
+}
+
+// ── Carregamento ──────────────────────────────────────────────────────────
+async function loadCalendar() {
+  for (const src of SOURCES) {
+    try {
+      const r = await fetch(src, { cache: 'no-cache' });
+      if (r.ok) return await r.text();
+    } catch (_) {}
+  }
+  throw new Error('Não foi possível carregar o CALENDARIO.md.');
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+function buildHeader() {
+  const tr = document.getElementById('thead-row');
+  tr.innerHTML = '';
+  for (const col of COLS) {
+    const th = document.createElement('th');
+    th.className = `${col.cls} font-semibold text-xs uppercase tracking-wider bg-ink select-none sortable`;
+    th.dataset.key = col.key;
+
+    const isActive = col.key === sortCol;
+    if (isActive) th.classList.add(sortDir === 'asc' ? 'sort-asc' : 'sort-desc');
+
+    th.innerHTML = `${esc(col.label)}<span class="sort-icon text-brand"></span>`;
+    th.addEventListener('click', () => onSort(col.key));
+    tr.appendChild(th);
+  }
+}
+
+function onSort(key) {
+  const col = COLS.find(c => c.key === key);
+  if (!col || col.sortType === 'none') return;
+  if (sortCol === key) sortDir = sortDir === 'asc' ? 'desc' : 'asc';
+  else { sortCol = key; sortDir = 'asc'; }
+  buildHeader();
+  renderRows();
+}
+
+function sortedRows(rows) {
+  const col = COLS.find(c => c.key === sortCol);
+  if (!col || col.sortType === 'none') return rows;
+
+  return [...rows].sort((a, b) => {
+    let va, vb;
+    if (col.sortType === 'date') {
+      va = dateVal(a[sortCol]); vb = dateVal(b[sortCol]);
+    } else if (col.sortType === 'dia') {
+      va = diaNum(a[sortCol]); vb = diaNum(b[sortCol]);
+    } else {
+      va = norm(Array.isArray(a[sortCol]) ? a[sortCol].join(', ') : a[sortCol]);
+      vb = norm(Array.isArray(b[sortCol]) ? b[sortCol].join(', ') : b[sortCol]);
+    }
+    const cmp = va < vb ? -1 : va > vb ? 1 : 0;
+    return sortDir === 'asc' ? cmp : -cmp;
+  });
+}
+
+function filteredRows() {
+  return allRows.filter(r => {
+    if (filterNivel && r.nivel !== filterNivel) return false;
+    if (filterSerie && r.serie !== filterSerie) return false;
+    if (filterSearch) {
+      const q = norm(filterSearch);
+      const hay = norm([r.nivel, r.data, r.dia, r.serie, r.modalidade, r.prova, r.materias.join(' '), r.link].join(' '));
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+function renderRows() {
+  const rows = sortedRows(filteredRows());
+  const tbody = document.getElementById('tbody');
+  const noRes = document.getElementById('no-results');
+
+  document.getElementById('badge-count').textContent = rows.length + ' registros';
+
+  if (!rows.length) {
+    tbody.innerHTML = '';
+    noRes.classList.remove('hidden');
+    return;
+  }
+  noRes.classList.add('hidden');
+
+  tbody.innerHTML = rows.map(r => `
+    <tr class="transition-colors">
+      <td class="px-4 py-2.5 text-mist text-xs font-medium">${esc(r.nivel)}</td>
+      <td class="px-4 py-2.5 font-semibold text-snow">${esc(r.data) || '<span class="text-mist">—</span>'}</td>
+      <td class="px-4 py-2.5 text-mist">${esc(r.dia)}</td>
+      <td class="px-4 py-2.5">${esc(r.serie)}</td>
+      <td class="px-4 py-2.5 text-mist">${esc(r.modalidade)}</td>
+      <td class="px-4 py-2.5 wrap text-mist">${esc(r.prova)}</td>
+      <td class="px-4 py-2.5 wrap">${r.materias.map(m => `<span class="badge">${esc(m)}</span>`).join('')}</td>
+      <td class="px-4 py-2.5">
+        ${r.link
+          ? `<a href="${esc(r.link)}" target="_blank" rel="noopener" class="link-btn"><i class="fa fa-external-link-alt text-[10px]"></i> Abrir</a>`
+          : '<span class="text-mist text-xs">Em breve</span>'}
+      </td>
+    </tr>`).join('');
+}
+
+function populateSerieSelect() {
+  const sel = document.getElementById('sel-serie');
+  const series = [...new Set(allRows.map(r => r.serie))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+  series.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    sel.appendChild(opt);
+  });
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const md = await loadCalendar();
+    allRows = parseCalendar(md);
+
+    document.getElementById('loading').classList.add('hidden');
+    document.getElementById('table-wrap').classList.remove('hidden');
+    document.getElementById('badge-count').classList.remove('hidden');
+
+    populateSerieSelect();
+    buildHeader();
+    renderRows();
+
+    // Eventos de filtro
+    document.getElementById('search').addEventListener('input', e => {
+      filterSearch = e.target.value;
+      renderRows();
+    });
+    document.getElementById('sel-nivel').addEventListener('change', e => {
+      filterNivel = e.target.value;
+      // Reseta série ao mudar nível
+      filterSerie = '';
+      document.getElementById('sel-serie').value = '';
+      renderRows();
+    });
+    document.getElementById('sel-serie').addEventListener('change', e => {
+      filterSerie = e.target.value;
+      renderRows();
+    });
+    document.getElementById('btn-reset').addEventListener('click', () => {
+      filterNivel = ''; filterSerie = ''; filterSearch = '';
+      document.getElementById('search').value = '';
+      document.getElementById('sel-nivel').value = '';
+      document.getElementById('sel-serie').value = '';
+      renderRows();
+    });
+
+  } catch (err) {
+    document.getElementById('loading').classList.add('hidden');
+    const el = document.getElementById('error');
+    el.textContent = err.message;
+    el.classList.remove('hidden');
+  }
+}
+
+init();
+</script>
+</body>
+</html>
