@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulados SARESP - Portal de Revisão</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts Inter -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            ink: '#0E0F12',
+            page: '#1B1F26',
+            panel: '#2A3038',
+            brand: { DEFAULT: '#1F5FBF', 700: '#174A96' },
+            mist: '#A3ADBA',
+            snow: '#F2F4F6',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-page text-snow font-sans min-h-screen flex flex-col antialiased selection:bg-brand selection:text-white">
+
+  <!-- Header Header / Banner -->
+  <header class="bg-panel border-b-4 border-brand text-snow shadow-md relative overflow-hidden">
+    <div class="absolute inset-0 bg-pattern opacity-10"></div>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <div class="inline-flex items-center gap-2 bg-brand text-white px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-2">
+            <i class="fa-solid fa-graduation-cap"></i> Preparatório Educacional
+          </div>
+          <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight">Simulados SARESP</h1>
+          <p class="text-mist mt-1 max-w-xl text-sm sm:text-base">
+            Links organizados para acesso rápido aos simulados de revisão do SARESP, separados por ano e disciplina.
+          </p>
+        </div>
+
+        <!-- Contadores rápidos -->
+        <div class="flex gap-3 text-center">
+          <div class="bg-ink rounded-2xl p-3 border border-mist/30 flex-1 min-w-[90px]">
+            <span class="block text-2xl font-bold">33</span>
+            <span class="text-xs text-mist">Simulados</span>
+          </div>
+          <div class="bg-ink rounded-2xl p-3 border border-mist/30 flex-1 min-w-[90px]">
+            <span class="block text-2xl font-bold">6</span>
+            <span class="text-xs text-mist">Séries</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Conteúdo Principal -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+    <!-- Pills: Nível de Ensino -->
+    <div id="level-filters" class="flex flex-wrap items-center gap-2 mb-4">
+      <span class="text-xs font-semibold uppercase tracking-wider text-mist mr-1"><i class="fa-solid fa-layer-group"></i> Nível</span>
+      <button type="button" onclick="filterLevel('all')" data-level="all" class="level-pill"></button>
+      <button type="button" onclick="filterLevel('fund')" data-level="fund" class="level-pill"></button>
+      <button type="button" onclick="filterLevel('medio')" data-level="medio" class="level-pill"></button>
+    </div>
+
+    <!-- Barra de Ferramentas: Filtros e Busca -->
+    <div class="bg-panel p-4 sm:p-5 rounded-2xl shadow-sm border border-mist/20 mb-8 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between gap-4 sticky top-4 z-30 backdrop-blur-lg">
+
+      <!-- Filtros por Ano -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none" id="year-filters">
+        <button onclick="filterYear('all')" data-filter="all" class="filter-btn active-filter px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap bg-brand text-white shadow-sm hover:bg-brand-700">
+          Todos os Anos
+        </button>
+        <button onclick="filterYear('6')" data-filter="6" class="filter-btn px-4 py-2 rounded-xl text-sm font-medium text-snow hover:bg-ink transition-all duration-200 whitespace-nowrap">
+          6º Anos
+        </button>
+        <button onclick="filterYear('7')" data-filter="7" class="filter-btn px-4 py-2 rounded-xl text-sm font-medium text-snow hover:bg-ink transition-all duration-200 whitespace-nowrap">
+          7º Anos
+        </button>
+        <button onclick="filterYear('8')" data-filter="8" class="filter-btn px-4 py-2 rounded-xl text-sm font-medium text-snow hover:bg-ink transition-all duration-200 whitespace-nowrap">
+          8º Anos
+        </button>
+        <button onclick="filterYear('9')" data-filter="9" class="filter-btn px-4 py-2 rounded-xl text-sm font-medium text-snow hover:bg-ink transition-all duration-200 whitespace-nowrap">
+          9º Anos
+        </button>
+        <button onclick="filterYear('em1')" data-filter="em1" class="filter-btn px-4 py-2 rounded-xl text-sm font-medium text-snow hover:bg-ink transition-all duration-200 whitespace-nowrap">
+          1ª Série EM
+        </button>
+        <button onclick="filterYear('em2')" data-filter="em2" class="filter-btn px-4 py-2 rounded-xl text-sm font-medium text-snow hover:bg-ink transition-all duration-200 whitespace-nowrap">
+          2ª Série EM
+        </button>
+      </div>
+
+      <!-- Input de Pesquisa -->
+      <div class="relative min-w-[240px] md:w-72">
+        <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-mist"></i>
+        <input
+          type="text"
+          id="search-input"
+          oninput="handleSearch()"
+          placeholder="Buscar disciplina, dia..."
+          class="w-full pl-10 pr-4 py-2 text-sm bg-ink text-snow placeholder-mist border border-mist/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand transition-all duration-200"
+        />
+      </div>
+    </div>
+
+    <!-- Navegação por Dia -->
+    <div class="mb-8 -mt-2">
+      <div class="flex items-center gap-2 mb-2 text-xs font-semibold uppercase tracking-wider text-mist">
+        <i class="fa-regular fa-calendar-days"></i> Ver por dia
+      </div>
+      <div id="day-filters" class="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none"></div>
+    </div>
+
+    <!-- Container dos Cards de Simulados -->
+    <div id="simulados-container" class="space-y-10">
+
+      <!-- Section: 6º ANOS -->
+      <section class="year-section" data-year="6">
+        <div class="flex items-center gap-3 mb-5 border-b border-mist/20 pb-3">
+          <div class="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center font-bold text-lg">6º</div>
+          <div>
+            <h2 class="text-xl font-bold text-snow">Simulados — 6º Anos</h2>
+            <p class="text-xs text-mist">Revisões preparatórias para o 6º ano do Ensino Fundamental</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Card Item -->
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="ciências revisao" data-subject="ciencias">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 6º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Revisão</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Ciências</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                Revisão – SARESP - Simulado CIÊNCIAS
+              </h3>
+            </div>
+            <a href="https://forms.gle/mvoZneH9hcE9tqZf8" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="dia 1 lp lingua portuguesa revisao" data-subject="lp">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 6º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 1</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Língua Portuguesa</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                DIA 1 - Revisão – SARESP - Simulado LP
+              </h3>
+            </div>
+            <a href="https://forms.gle/fD4rHiqxASycesoMA" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="dia 2 mat matematica revisao" data-subject="mat">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 6º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 2</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Matemática</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                DIA 2 - Revisão – SARESP - Simulado MAT
+              </h3>
+            </div>
+            <a href="https://forms.gle/oJpoiRdsEGGDKgzB6" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="dia 4 hist historia revisao" data-subject="hist">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 6º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 4</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">História</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                DIA 4 – Revisão – SARESP - Simulado HIST
+              </h3>
+            </div>
+            <a href="https://forms.gle/UrsytjGZxY5Y24G3A" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="dia 5 geo geografia revisao" data-subject="geo">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 6º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 5</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Geografia</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                DIA 5 - Revisão – SARESP - Simulado GEO
+              </h3>
+            </div>
+            <a href="https://forms.gle/vTCKEpixZuqor9hM6" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="dia 6 ing ingles revisao" data-subject="ing">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 6º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 6</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Inglês</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                DIA 6 - Revisão – SARESP - Simulado ING
+              </h3>
+            </div>
+            <a href="https://forms.gle/bUzXfhiktkMJSNAs5" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: 7º ANOS -->
+      <section class="year-section" data-year="7">
+        <div class="flex items-center gap-3 mb-5 border-b border-mist/20 pb-3">
+          <div class="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center font-bold text-lg">7º</div>
+          <div>
+            <h2 class="text-xl font-bold text-snow">Simulados — 7º Anos</h2>
+            <p class="text-xs text-mist">Revisões preparatórias para o 7º ano do Ensino Fundamental</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="7 anos dia 1 lp lingua portuguesa revisao" data-subject="lp">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 7º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 1</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Língua Portuguesa</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                7 ANOS - DIA 1 - Revisão – SARESP - Simulado LP
+              </h3>
+            </div>
+            <a href="https://forms.gle/Vxe4mFg6AD6FH5GF7" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="7 anos dia 2 mat matematica revisao" data-subject="mat">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 7º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 2</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Matemática</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                7 ANOS - DIA 2 - Revisão – SARESP - Simulado MAT
+              </h3>
+            </div>
+            <a href="https://forms.gle/Z1KrLZDuJfKBGxYa6" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="7 anos dia 3 ciencias revisao" data-subject="ciencias">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 7º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 3</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Ciências</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                7 ANOS - DIA 3 – SARESP - Simulado CIÊNCIAS
+              </h3>
+            </div>
+            <a href="https://forms.gle/Jf51MKRTHtVKvhKt6" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="7 anos dia 4 hist historia revisao" data-subject="hist">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 7º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 4</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">História</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                7 ANOS - DIA 4 – Revisão – SARESP - Simulado HIST
+              </h3>
+            </div>
+            <a href="https://forms.gle/brxxmc8qWbi7Zdw69" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="7 anos dia 5 geo geografia revisao" data-subject="geo">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 7º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 5</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Geografia</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                7 ANOS - DIA 5 - Revisão – SARESP - Simulado GEO
+              </h3>
+            </div>
+            <a href="https://forms.gle/AcDpGrqivREfzKzL8" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="7 anos dia 6 ing ingles revisao" data-subject="ing">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 7º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 6</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Inglês</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                7 ANOS - DIA 6 - Revisão – SARESP - Simulado ING
+              </h3>
+            </div>
+            <a href="https://forms.gle/5XASsy4xsj8c9WGt7" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: 8º ANOS -->
+      <section class="year-section" data-year="8">
+        <div class="flex items-center gap-3 mb-5 border-b border-mist/20 pb-3">
+          <div class="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center font-bold text-lg">8º</div>
+          <div>
+            <h2 class="text-xl font-bold text-snow">Simulados — 8º Anos</h2>
+            <p class="text-xs text-mist">Revisões preparatórias para o 8º ano do Ensino Fundamental</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="8 anos dia 1 lp lingua portuguesa revisao" data-subject="lp">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 8º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 1</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Língua Portuguesa</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                8 ANOS - DIA 1 - Revisão – SARESP - Simulado LP
+              </h3>
+            </div>
+            <a href="https://forms.gle/DZR3eecffp7YnsvH9" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="8 anos dia 2 mat matematica revisao" data-subject="mat">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 8º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 2</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Matemática</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                8 ANOS - DIA 2 - Revisão – SARESP - Simulado MAT
+              </h3>
+            </div>
+            <a href="https://forms.gle/ps5Z8oeKjC5VfU6w6" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="8 anos dia 3 ciencias revisao" data-subject="ciencias">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 8º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 3</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Ciências</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                8 ANOS - DIA 3 – SARESP - Simulado CIÊNCIAS
+              </h3>
+            </div>
+            <a href="https://forms.gle/6tKQG6qFWKC7QToH8" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="8 anos dia 4 hist historia revisao" data-subject="hist">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 8º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 4</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">História</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                8 ANOS - DIA 4 – Revisão – SARESP - Simulado HIST
+              </h3>
+            </div>
+            <a href="https://forms.gle/GSfTCeCwE4P2pHPW9" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="8 anos dia 5 geo geografia revisao" data-subject="geo">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 8º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 5</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Geografia</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                8 ANOS - DIA 5 - Revisão – SARESP - Simulado GEO
+              </h3>
+            </div>
+            <a href="https://forms.gle/nyqTtt92ipCXSEHZ7" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="8 anos dia 6 ing ingles revisao" data-subject="ing">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 8º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 6</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Inglês</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                8 ANOS - DIA 6 - Revisão – SARESP - Simulado ING
+              </h3>
+            </div>
+            <a href="https://forms.gle/QGQjK7DLiAL58vkVA" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: 9º ANOS -->
+      <section class="year-section" data-year="9">
+        <div class="flex items-center gap-3 mb-5 border-b border-mist/20 pb-3">
+          <div class="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center font-bold text-lg">9º</div>
+          <div>
+            <h2 class="text-xl font-bold text-snow">Simulados — 9º Anos</h2>
+            <p class="text-xs text-mist">Revisões preparatórias para o 9º ano do Ensino Fundamental</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="9 anos dia 1 lp lingua portuguesa revisao" data-subject="lp">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 9º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 1</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Língua Portuguesa</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                9 ANOS - DIA 1 - Revisão – SARESP - Simulado LP
+              </h3>
+            </div>
+            <a href="https://forms.gle/7j5Vu7BkNYF8yGUHA" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="9 anos dia 2 mat matematica revisao" data-subject="mat">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 9º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 2</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Matemática</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                9 ANOS - DIA 2 - Revisão – SARESP - Simulado MAT
+              </h3>
+            </div>
+            <a href="https://forms.gle/KxMARewGQ8NWPSS47" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <!-- Item Desabilitado (Em Breve) -->
+          <div class="simulado-card bg-ink p-5 rounded-2xl border border-dashed border-mist/50 flex flex-col justify-between" data-title="9 anos dia 3 ciencias saresp" data-subject="ciencias">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-panel text-snow border border-mist/40">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 9º Ano
+                </span>
+                <span class="day-label text-xs font-medium text-snow bg-ink px-2 py-0.5 rounded-md border border-mist/40">Em breve</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Ciências</span></div>
+              <h3 class="font-semibold text-mist text-base mb-4 leading-snug">
+                9 ANOS - DIA 3 – SARESP - Simulado CIÊNCIAS
+              </h3>
+            </div>
+            <button disabled class="w-full py-2.5 px-4 bg-panel text-mist rounded-xl text-sm font-semibold cursor-not-allowed flex items-center justify-center gap-2">
+              <i class="fa-solid fa-lock text-xs"></i>
+              <span>Indisponível</span>
+            </button>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="9 anos dia 4 hist historia revisao" data-subject="hist">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 9º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 4</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">História</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                9 ANOS - DIA 4 – Revisão – SARESP - Simulado HIST
+              </h3>
+            </div>
+            <a href="https://forms.gle/AAJfgojoRaxa1PpX7" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="9 anos dia 5 geo geografia revisao" data-subject="geo">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 9º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 5</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Geografia</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                9 ANOS - DIA 5 - Revisão – SARESP - Simulado GEO
+              </h3>
+            </div>
+            <a href="https://forms.gle/pW8yEic7fJxq5aid7" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="9 anos dia 6 ing ingles revisao" data-subject="ing">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-school text-mist"></i> EF - 9º Ano
+                </span>
+                <span class="day-label text-base font-bold text-snow">Dia 6</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Inglês</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                9 ANOS - DIA 6 - Revisão – SARESP - Simulado ING
+              </h3>
+            </div>
+            <a href="https://forms.gle/mxf8AmbbMCbaBd8s8" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- Section: Simulados — 1ª Série do Ensino Médio -->
+      <section class="year-section" data-year="em1">
+        <div class="flex items-center gap-3 mb-5 border-b border-mist/20 pb-3">
+          <div class="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center font-bold text-lg">1ª</div>
+          <div>
+            <h2 class="text-xl font-bold text-snow">Simulados — 1ª Série do Ensino Médio</h2>
+            <p class="text-xs text-mist">Simulados da 1ª série do Ensino Médio</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="04.11 1 serie lp mat EM Regular 1ª SÉRIE - 04.11 - EM Regular (LP, MAT) lingua portuguesa matematica">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border-mist/30 border">
+                  <i class="fa-solid fa-school text-mist"></i> EM Regular
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-layer-group text-mist"></i> 1ª Série
+                </span>
+              </div>
+                <span class="day-label text-base font-bold text-snow">04.11</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Língua Portuguesa</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Matemática</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                1ª SÉRIE - 04.11 - EM Regular (LP, MAT)
+              </h3>
+            </div>
+            <a href="https://forms.gle/QouqAyQUqx81YgZr8" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="05.11 1 serie geo hist filo EM Regular 1ª SÉRIE - 05.11 - EM Regular (GEO, HIST, FILO) geografia historia filosofia">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border-mist/30 border">
+                  <i class="fa-solid fa-school text-mist"></i> EM Regular
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-layer-group text-mist"></i> 1ª Série
+                </span>
+              </div>
+                <span class="day-label text-base font-bold text-snow">05.11</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Geografia</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">História</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Filosofia</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                1ª SÉRIE - 05.11 - EM Regular (GEO, HIST, FILO)
+              </h3>
+            </div>
+            <a href="https://forms.gle/jjZfLbsCRuEtXcKC7" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="10.11 1 serie qui fis bio EM Regular 1ª SÉRIE - 10.11 - EM Regular (QUI, FIS, BIO) quimica fisica biologia">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border-mist/30 border">
+                  <i class="fa-solid fa-school text-mist"></i> EM Regular
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-layer-group text-mist"></i> 1ª Série
+                </span>
+              </div>
+                <span class="day-label text-base font-bold text-snow">10.11</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Química</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Física</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Biologia</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                1ª SÉRIE - 10.11 - EM Regular (QUI, FIS, BIO)
+              </h3>
+            </div>
+            <a href="https://forms.gle/pacibE8sy6fBXhtx7" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="11.11 1 serie ing ingles EM Regular 1ª SÉRIE - 11.11 - EM Regular (INGL) ingles">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border-mist/30 border">
+                  <i class="fa-solid fa-school text-mist"></i> EM Regular
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-layer-group text-mist"></i> 1ª Série
+                </span>
+              </div>
+                <span class="day-label text-base font-bold text-snow">11.11</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Inglês</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                1ª SÉRIE - 11.11 - EM Regular (INGL)
+              </h3>
+            </div>
+            <a href="https://forms.gle/LQ4yg8dMgAwZ2ztC9" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section: Simulados — 2ª Série do Ensino Médio -->
+      <section class="year-section" data-year="em2">
+        <div class="flex items-center gap-3 mb-5 border-b border-mist/20 pb-3">
+          <div class="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center font-bold text-lg">2ª</div>
+          <div>
+            <h2 class="text-xl font-bold text-snow">Simulados — 2ª Série do Ensino Médio</h2>
+            <p class="text-xs text-mist">Simulados da 2ª série do Ensino Médio (Regular e Novotec)</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="04.11 2 serie lp ing mat fis EM Regular 2ª SÉRIE - 04.11 - EM Regular (LP, ING, MAT, FÍS) lingua portuguesa ingles matematica fisica">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border-mist/30 border">
+                  <i class="fa-solid fa-school text-mist"></i> EM Regular
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-layer-group text-mist"></i> 2ª Série
+                </span>
+              </div>
+                <span class="day-label text-base font-bold text-snow">04.11</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Língua Portuguesa</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Inglês</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Matemática</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Física</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                2ª SÉRIE - 04.11 - EM Regular (LP, ING, MAT, FÍS)
+              </h3>
+            </div>
+            <a href="https://forms.gle/XkWgTHTwfBpA4cW78" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="05.11 2 serie socio hist geo qui bio EM Regular 2ª SÉRIE - 05.11 - EM Regular (SOCIO, HIST, GEO, QUÍ, BIO) sociologia historia geografia quimica biologia">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border-mist/30 border">
+                  <i class="fa-solid fa-school text-mist"></i> EM Regular
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-layer-group text-mist"></i> 2ª Série
+                </span>
+              </div>
+                <span class="day-label text-base font-bold text-snow">05.11</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Sociologia</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">História</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Geografia</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Química</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Biologia</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                2ª SÉRIE - 05.11 - EM Regular (SOCIO, HIST, GEO, QUÍ, BIO)
+              </h3>
+            </div>
+            <a href="https://forms.gle/2kDdcFVoRMBQCMUEA" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="12.11 2 serie a adm Novotec 2ª SÉRIE A - 12.11 - Novotec (ADM) administracao">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border-mist/30 border">
+                  <i class="fa-solid fa-laptop-code text-mist"></i> EM Novotec
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-layer-group text-mist"></i> 2ª Série
+                </span>
+              </div>
+                <span class="day-label text-base font-bold text-snow">12.11</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Administração</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                2ª SÉRIE A - 12.11 - Novotec (ADM)
+              </h3>
+            </div>
+            <a href="https://forms.gle/WmWXo5ozGxGZMoQB8" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="12.11 2 serie b processos redes Novotec 2ª SÉRIE B - 12.11 - Novotec (PROCESSOS e REDES) processos redes">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border-mist/30 border">
+                  <i class="fa-solid fa-laptop-code text-mist"></i> EM Novotec
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-layer-group text-mist"></i> 2ª Série
+                </span>
+              </div>
+                <span class="day-label text-base font-bold text-snow">12.11</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Processos</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Redes</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                2ª SÉRIE B - 12.11 - Novotec (PROCESSOS e REDES)
+              </h3>
+            </div>
+            <a href="https://forms.gle/L46gEZdB5dHQbf947" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="12.11 2 serie c oratoria artes midias Novotec 2ª SÉRIE C - 12.11 - Novotec (ORATÓRIA e ARTES E MÍDIAS) oratoria artes e midias">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border-mist/30 border">
+                  <i class="fa-solid fa-laptop-code text-mist"></i> EM Novotec
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-layer-group text-mist"></i> 2ª Série
+                </span>
+              </div>
+                <span class="day-label text-base font-bold text-snow">12.11</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Oratória</span><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Artes e Mídias</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                2ª SÉRIE C - 12.11 - Novotec (ORATÓRIA e ARTES E MÍDIAS)
+              </h3>
+            </div>
+            <a href="https://forms.gle/fNRryg7tuGk9wJXy9" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+
+          <div class="simulado-card bg-panel p-5 rounded-2xl border border-mist/20 shadow-sm hover:border-brand hover:shadow-md transition-all duration-200 flex flex-col justify-between" data-title="13.11 2 serie educacao fisica EM Regular 2ª SÉRIE - 13.11 - EM Regular (EDUC. FÍSICA) educacao fisica">
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <div class="flex flex-wrap items-center gap-1.5">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border-mist/30 border">
+                  <i class="fa-solid fa-school text-mist"></i> EM Regular
+                </span>
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-ink text-snow border border-mist/30">
+                  <i class="fa-solid fa-layer-group text-mist"></i> 2ª Série
+                </span>
+              </div>
+                <span class="day-label text-base font-bold text-snow">13.11</span>
+              </div>
+              <div class="flex flex-wrap gap-1.5 mb-3"><span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-ink text-snow border border-mist/30">Educação Física</span></div>
+              <h3 class="font-semibold text-snow text-base mb-4 leading-snug">
+                2ª SÉRIE - 13.11 - EM Regular (EDUC. FÍSICA)
+              </h3>
+            </div>
+            <a href="https://forms.gle/eQo3FTtEqYRSLpiq9" target="_blank" rel="noopener noreferrer" class="w-full py-2.5 px-4 bg-brand hover:bg-brand-700 text-white rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 group">
+              <span>Acessar Simulado</span>
+              <i class="fa-solid fa-arrow-up-right-from-square text-xs group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Empty State quando nenhuma busca é encontrada -->
+    <div id="no-results" class="hidden text-center py-16 bg-panel rounded-2xl border border-mist/20 shadow-sm mt-6">
+      <div class="w-16 h-16 mx-auto bg-ink text-mist rounded-full flex items-center justify-center text-2xl mb-4">
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+      <h3 class="text-lg font-bold text-snow mb-1">Nenhum simulado encontrado</h3>
+      <p class="text-sm text-mist max-w-sm mx-auto">Tente buscar por termos diferentes como "Matemática", "Português", "Dia 1" ou selecione outro ano.</p>
+    </div>
+
+  </main>
+
+  <!-- Rodapé -->
+  <footer class="bg-panel border-t border-mist/20 mt-12">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-mist">
+      <p>© Portal de Simulados SARESP. Todos os direitos reservados aos organizadores dos formulários.</p>
+      <div class="flex items-center gap-4">
+        <span class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-ink0"></span> Google Forms Integrado</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Lógica JavaScript Interativa -->
+  <script>
+    let currentYearFilter = 'all';
+    let currentDayFilter = 'all';
+    let currentLevelFilter = 'all';
+
+    const LEVELS = [
+      { key: 'all', label: 'Todos', icon: 'fa-border-all' },
+      { key: 'fund', label: 'Ensino Fundamental', icon: 'fa-book-open' },
+      { key: 'medio', label: 'Ensino Médio', icon: 'fa-user-graduate' },
+    ];
+    const PILL_BASE = "level-pill inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 whitespace-nowrap ";
+    const PILL_ON = PILL_BASE + "bg-brand text-white border-brand shadow-sm";
+    const PILL_OFF = PILL_BASE + "bg-panel text-snow border-mist/30 hover:bg-ink";
+
+    // Anos numéricos (6, 7, 8, 9) são Fundamental; em1/em2 são Médio
+    function levelOf(year) {
+      return /^\d+$/.test(year) ? 'fund' : 'medio';
+    }
+
+    function levelMatches(year) {
+      return currentLevelFilter === 'all' || levelOf(year) === currentLevelFilter;
+    }
+
+    function renderLevelPills() {
+      document.querySelectorAll('#level-filters .level-pill').forEach(btn => {
+        const lv = LEVELS.find(l => l.key === btn.dataset.level);
+        btn.className = btn.dataset.level === currentLevelFilter ? PILL_ON : PILL_OFF;
+        btn.innerHTML = '<i class="fa-solid ' + lv.icon + '"></i>' + lv.label;
+        btn.setAttribute('aria-pressed', btn.dataset.level === currentLevelFilter);
+      });
+    }
+
+    function filterLevel(level) {
+      currentLevelFilter = level;
+      renderLevelPills();
+
+      // Esconde os botões de ano de outro nível
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        const f = btn.dataset.filter;
+        btn.style.display = (f === 'all' || levelMatches(f)) ? '' : 'none';
+      });
+
+      // Se o ano selecionado não pertence ao nível, volta para "Todos os Anos"
+      if (currentYearFilter !== 'all' && !levelMatches(currentYearFilter)) {
+        filterYear('all');
+      } else {
+        applyFilters();
+      }
+    }
+
+    function filterYear(year) {
+      currentYearFilter = year;
+
+      // Atualizar estado dos botões
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        if (btn.dataset.filter === year) {
+          btn.className = "filter-btn active-filter px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap bg-brand text-white shadow-sm hover:bg-brand-700";
+        } else {
+          btn.className = "filter-btn px-4 py-2 rounded-xl text-sm font-medium text-snow hover:bg-ink transition-all duration-200 whitespace-nowrap";
+        }
+      });
+
+      applyFilters();
+    }
+
+    function handleSearch() {
+      applyFilters();
+    }
+
+    function applyFilters() {
+      const query = document.getElementById('search-input').value.toLowerCase().trim();
+      const sections = document.querySelectorAll('.year-section');
+      let totalVisibleCards = 0;
+
+      sections.forEach(section => {
+        const sectionYear = section.dataset.year;
+        const yearMatches = (currentYearFilter === 'all' || currentYearFilter === sectionYear) && levelMatches(sectionYear);
+
+        if (!yearMatches) {
+          section.style.display = 'none';
+          return;
+        }
+
+        const cards = section.querySelectorAll('.simulado-card');
+        let visibleCardsInSection = 0;
+
+        cards.forEach(card => {
+          const cardText = card.dataset.title.toLowerCase();
+          const queryMatches = query === '' || cardText.includes(query);
+          const dayMatches = currentDayFilter === 'all' || card.dataset.day === currentDayFilter;
+
+          if (queryMatches && dayMatches) {
+            card.style.display = 'flex';
+            visibleCardsInSection++;
+            totalVisibleCards++;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        if (visibleCardsInSection > 0) {
+          section.style.display = 'block';
+        } else {
+          section.style.display = 'none';
+        }
+      });
+
+      updateDayChips();
+
+      // Exibe mensagem caso nenhum card seja visível
+      const noResultsElement = document.getElementById('no-results');
+      if (totalVisibleCards === 0) {
+        noResultsElement.classList.remove('hidden');
+      } else {
+        noResultsElement.classList.add('hidden');
+      }
+    }
+
+    // Navegação por dia: o rótulo do dia é lido do próprio card (ex.: "Dia 1", "Revisão", "04.11")
+    const DAY_CHIP_BASE = "day-btn px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap border ";
+    const DAY_CHIP_ON = DAY_CHIP_BASE + "bg-brand text-white border-brand shadow-sm";
+    const DAY_CHIP_OFF = DAY_CHIP_BASE + "bg-panel text-snow border-mist/30 hover:bg-ink";
+
+    function dayOrder(label) {
+      const date = label.match(/^(\d{2})\.(\d{2})$/);
+      if (date) return [2, +date[2] * 100 + +date[1]];
+      const n = label.match(/(\d+)/);
+      return n ? [1, +n[1]] : [0, 0];
+    }
+
+    function setupDayFilters() {
+      const days = new Set();
+      document.querySelectorAll('.simulado-card').forEach(card => {
+        const label = card.querySelector('.day-label');
+        const day = label ? label.textContent.trim() : '';
+        card.dataset.day = day;
+        if (day && day !== 'Em breve') days.add(day);
+      });
+
+      const sorted = [...days].sort((a, b) => {
+        const [ga, na] = dayOrder(a), [gb, nb] = dayOrder(b);
+        return ga - gb || na - nb || a.localeCompare(b);
+      });
+
+      const box = document.getElementById('day-filters');
+      ['all', ...sorted].forEach(day => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.day = day;
+        btn.textContent = day === 'all' ? 'Todos os dias' : day;
+        btn.addEventListener('click', () => filterDay(day));
+        box.appendChild(btn);
+      });
+      updateDayChips();
+    }
+
+    function filterDay(day) {
+      currentDayFilter = day;
+      applyFilters();
+    }
+
+    // Destaca o dia ativo e esconde dias sem cards no ano selecionado
+    function updateDayChips() {
+      const available = new Set();
+      document.querySelectorAll('.year-section').forEach(section => {
+        if (currentYearFilter !== 'all' && currentYearFilter !== section.dataset.year) return;
+        if (!levelMatches(section.dataset.year)) return;
+        section.querySelectorAll('.simulado-card').forEach(c => available.add(c.dataset.day));
+      });
+
+      if (currentDayFilter !== 'all' && !available.has(currentDayFilter)) {
+        currentDayFilter = 'all';
+        applyFilters();
+        return;
+      }
+
+      document.querySelectorAll('#day-filters button').forEach(btn => {
+        const day = btn.dataset.day;
+        btn.style.display = (day === 'all' || available.has(day)) ? '' : 'none';
+        btn.className = day === currentDayFilter ? DAY_CHIP_ON : DAY_CHIP_OFF;
+      });
+    }
+
+    // Copiar link: usa a Clipboard API e, se bloqueada (ex.: iframe do Google Sites), cai para execCommand
+    function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        return navigator.clipboard.writeText(text).catch(() => legacyCopy(text));
+      }
+      return legacyCopy(text);
+    }
+
+    function legacyCopy(text) {
+      return new Promise((resolve, reject) => {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        ta.setSelectionRange(0, text.length);
+        try {
+          document.execCommand('copy') ? resolve() : reject();
+        } catch (err) {
+          reject(err);
+        } finally {
+          document.body.removeChild(ta);
+        }
+      });
+    }
+
+    const COPY_BTN_CLASS = "copy-btn py-2.5 px-3.5 bg-ink border border-mist/40 text-snow hover:bg-snow hover:text-ink rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shrink-0";
+    const COPY_BTN_OK_CLASS = "copy-btn py-2.5 px-3.5 bg-snow text-ink border border-snow rounded-xl text-sm font-semibold transition-all duration-200 flex items-center justify-center gap-2 shrink-0";
+
+    function setupCopyButtons() {
+      document.querySelectorAll('.simulado-card').forEach(card => {
+        const link = card.querySelector('a[href]');
+        if (!link) return; // card "Em breve" não tem link
+
+        // Agrupa o botão de acesso e o de copiar lado a lado
+        const row = document.createElement('div');
+        row.className = 'flex items-stretch gap-2';
+        link.parentNode.insertBefore(row, link);
+        row.appendChild(link);
+        link.classList.remove('w-full');
+        link.classList.add('flex-1');
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = COPY_BTN_CLASS;
+        btn.title = 'Copiar link do formulário';
+        btn.setAttribute('aria-label', 'Copiar link do formulário');
+        btn.innerHTML = '<i class="fa-regular fa-copy"></i><span class="hidden sm:inline">Copiar link</span>';
+
+        let timer;
+        btn.addEventListener('click', () => {
+          copyText(link.href).then(() => {
+            btn.className = COPY_BTN_OK_CLASS;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i><span class="hidden sm:inline">Copiado!</span>';
+          }).catch(() => {
+            // Último recurso: mostra o link para o usuário copiar manualmente
+            window.prompt('Copie o link do formulário:', link.href);
+          }).finally(() => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+              btn.className = COPY_BTN_CLASS;
+              btn.innerHTML = '<i class="fa-regular fa-copy"></i><span class="hidden sm:inline">Copiar link</span>';
+            }, 2000);
+          });
+        });
+
+        row.appendChild(btn);
+      });
+    }
+
+    setupCopyButtons();
+    setupDayFilters();
+    renderLevelPills();
+  </script>
+</body>
+</html>
