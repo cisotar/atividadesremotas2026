@@ -69,10 +69,6 @@
     <!-- Pills: Nível de Ensino -->
     <div id="level-filters" class="flex flex-wrap items-center gap-2 mb-4">
       <span class="text-xs font-semibold uppercase tracking-wider text-mist mr-1"><i class="fa-solid fa-layer-group"></i> Nível</span>
-      <!-- pill visão simplificada adicionada via JS junto com as de nível -->
-      <a href="tabela.html" class="ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border-2 border-yellow-400 text-yellow-300 hover:bg-yellow-400/10 transition-all duration-200 whitespace-nowrap">
-        <i class="fa-solid fa-table text-xs"></i> Visão simplificada
-      </a>
     </div>
 
     <!-- Barra de Ferramentas: Filtros por Ano/Série e Matéria -->
@@ -338,6 +334,13 @@
         btn.innerHTML = '<i class="fa-solid ' + lv.icon + '"></i>' + lv.label;
         $('level-filters').appendChild(btn);
       });
+
+      // Link visão simplificada — pill com contorno amarelo, à direita das pills de nível
+      const tabLink = document.createElement('a');
+      tabLink.href = 'tabela.html';
+      tabLink.className = 'ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border-2 border-yellow-400 text-yellow-300 hover:bg-yellow-400/10 transition-all duration-200 whitespace-nowrap';
+      tabLink.innerHTML = '<i class="fa-solid fa-table text-xs"></i> Visão simplificada';
+      $('level-filters').appendChild(tabLink);
 
       const yearBox = $('year-filters');
       yearBox.appendChild(makeButton(YEAR_BTN_OFF, 'Todos os Anos', () => { state.group = 'all'; render(); }, { group: 'all' }));
