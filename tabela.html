@@ -534,7 +534,7 @@ document.getElementById('view-toggle').addEventListener('click', e => {
   const b = e.target.closest('.vt-btn');
   if (b) setView(b.dataset.view === 'print');
 });
-setView(false);
+setView(true);
 document.getElementById('btn-print').addEventListener('click', () => window.print());
 document.getElementById('btn-copy-word').addEventListener('click', e => {
   const btn = e.currentTarget;
