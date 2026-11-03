@@ -25,6 +25,7 @@
 | 04.11 | Dia #1 | 9º Ano | Anos Finais | Formulário - LP | Língua Portuguesa | https://forms.gle/7j5Vu7BkNYF8yGUHA |
 | 05.11 | Dia #2 | 9º Ano | Anos Finais | Formulário - MAT | Matemática | https://forms.gle/KxMARewGQ8NWPSS47 |
 | 10.11 | Dia #3 | 9º Ano | Anos Finais | Formulário - CIE | Ciências | https://forms.gle/7kK98o4ctZdo7t578 |
+| 11.11 | Dia #4 | 9º Ano | Anos Finais | Formulário - HIS | História | https://forms.gle/yp4wmSFSzoh7EpTHA |
 | 12.11 | Dia #5 | 9º Ano | Anos Finais | Formulário - GEO | Geografia | https://forms.gle/pW8yEic7fJxq5aid7 |
 | 13.11 | Dia #6 | 9º Ano | Anos Finais | Formulário - ING | Inglês | https://forms.gle/mxf8AmbbMCbaBd8s8 |
 
