@@ -77,6 +77,41 @@
     .copy-btn.copied { color: #34d399; border-color: #34d399; }
     /* sticky header */
     thead th { position: sticky; top: 0; z-index: 10; }
+    .vt-btn { color: #fde047; background: transparent; }
+    .vt-btn:hover { background: #facc1522; }
+    .vt-btn.active { background: #facc15; color: #0E0F12; }
+    /* ── Visão A4 (copiar p/ Word + imprimir) ── */
+    #print-main { display: none; }
+    body.view-print #print-main { display: block; }
+    body.view-print #table-main,
+    body.view-print #filtros { display: none; }
+    .pv-toolbar { display: flex; gap: 8px; justify-content: center; margin-bottom: 16px; }
+    .pv-sheet {
+      background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif;
+      width: 210mm; max-width: 100%; margin: 0 auto; padding: 12mm 10mm;
+      box-sizing: border-box; box-shadow: 0 2px 16px rgba(0,0,0,.5);
+    }
+    .pv-sheet h2 { font-size: 15pt; font-weight: 700; text-align: center; margin: 0 0 4mm; color: #000; }
+    .pv-sheet h3 { font-size: 11pt; font-weight: 700; margin: 4mm 0 1.5mm; color: #000; }
+    .pv-sheet table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 8.5pt; }
+    .pv-sheet th, .pv-sheet td {
+      border: 1px solid #000; padding: 0.7mm 1.8mm; line-height: 1.15; text-align: left; vertical-align: middle;
+      white-space: normal; background: #fff; color: #000; word-break: break-word;
+    }
+    .pv-sheet th { background: #e5e7eb; font-weight: 700; }
+    .pv-sheet a { color: #0645ad; text-decoration: underline; }
+    .pv-sheet tr:hover td { background: #fff; }
+    @page { size: A4 portrait; margin: 10mm; }
+    @media print {
+      header, footer, #table-main, #filtros, .pv-toolbar { display: none !important; }
+      html, body { background: #fff !important; min-height: 0 !important; }
+      #print-main { display: block !important; padding: 0 !important; overflow: visible !important; }
+      .pv-sheet h2 { font-size: 13pt; margin-bottom: 2mm; }
+      .pv-sheet h3 { margin: 3mm 0 1mm; }
+      .pv-sheet { width: auto; padding: 0; box-shadow: none; margin: 0; }
+      .pv-sheet tr { break-inside: avoid; }
+      .pv-sheet th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
     /* scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #1B1F26; }
@@ -96,6 +131,11 @@
     </div>
     <!-- Filtros rápidos -->
     <div class="flex items-center gap-2 flex-wrap">
+      <div id="view-toggle" role="group" aria-label="Alternar visão" class="inline-flex rounded-full border-2 border-yellow-400 overflow-hidden text-sm font-semibold">
+        <button type="button" data-view="table" class="vt-btn px-4 py-1.5 inline-flex items-center gap-2 whitespace-nowrap transition-colors"><i class="fa fa-table text-xs"></i> Tabela</button>
+        <button type="button" data-view="print" class="vt-btn px-4 py-1.5 inline-flex items-center gap-2 whitespace-nowrap transition-colors"><i class="fa fa-print text-xs"></i> Folha A4</button>
+      </div>
+      <div id="filtros" class="flex items-center gap-2 flex-wrap">
       <input id="search" type="text" placeholder="Buscar em qualquer coluna…"
         class="bg-panel text-snow placeholder-mist border border-mist/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand w-56">
       <select id="sel-nivel" class="bg-panel text-snow border border-mist/20 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand">
@@ -109,11 +149,12 @@
       <button id="btn-reset" class="text-mist hover:text-snow text-sm flex items-center gap-1 px-2 py-1.5 rounded hover:bg-panel transition-colors">
         <i class="fa fa-times-circle text-xs"></i> Limpar
       </button>
+      </div>
     </div>
   </header>
 
   <!-- Tabela -->
-  <main class="flex-grow overflow-auto px-4 py-6">
+  <main id="table-main" class="flex-grow overflow-auto px-4 py-6">
     <div id="loading" class="text-mist text-sm text-center py-20">
       <i class="fa fa-spinner fa-spin mr-2"></i>Carregando calendário…
     </div>
@@ -128,6 +169,15 @@
       </table>
     </div>
     <p id="no-results" class="hidden text-mist text-sm text-center py-20">Nenhum resultado encontrado.</p>
+  </main>
+
+  <!-- Visão A4: dois grupos, copiável p/ Word e imprimível em uma folha -->
+  <main id="print-main" class="flex-grow overflow-auto px-4 py-6">
+    <div class="pv-toolbar">
+      <button id="btn-copy-word" type="button" class="copy-btn"><i class="fa fa-copy text-[10px]"></i> Copiar para Word</button>
+      <button id="btn-print" type="button" class="link-btn"><i class="fa fa-print text-[10px]"></i> Imprimir</button>
+    </div>
+    <div id="pv-sheet" class="pv-sheet"></div>
   </main>
 
   <!-- Footer -->
@@ -368,6 +418,7 @@ async function init() {
     populateSerieSelect();
     buildHeader();
     renderRows();
+    renderPrintView();
 
     // Eventos de filtro
     document.getElementById('search').addEventListener('input', e => {
@@ -430,6 +481,65 @@ function legacyCopy(url, done) {
   try { document.execCommand('copy'); done(); } catch (_) { window.prompt('Copie o link:', url); }
   document.body.removeChild(ta);
 }
+
+// ── Visão A4 ──────────────────────────────────────────────────────────────
+function renderPrintView() {
+  const grupos = ['Ensino Fundamental', 'Ensino Médio'];
+  const fmtData = d => String(d).replace('.', '/');
+  const cmp = (a, b) => dateVal(a.data) - dateVal(b.data) ||
+    a.serie.localeCompare(b.serie, 'pt-BR', { numeric: true });
+  let html = '<h2>Calendário de Simulados – SARESP</h2>';
+  for (const g of grupos) {
+    const rows = allRows.filter(r => r.nivel === g).sort(cmp);
+    if (!rows.length) continue;
+    html += `<h3>${esc(g)}</h3>
+      <table>
+        <colgroup><col style="width:10%"><col style="width:15%"><col style="width:39%"><col style="width:36%"></colgroup>
+        <thead><tr><th>Data</th><th>Séries</th><th>Matéria(s)</th><th>Link</th></tr></thead>
+        <tbody>${rows.map(r => `<tr>
+          <td>${esc(fmtData(r.data))}</td>
+          <td>${esc(r.serie)}</td>
+          <td>${esc(r.materias.join(', '))}</td>
+          <td>${r.link ? `<a href="${esc(r.link)}">${esc(r.link)}</a>` : 'Em breve'}</td>
+        </tr>`).join('')}</tbody>
+      </table>`;
+  }
+  document.getElementById('pv-sheet').innerHTML = html;
+}
+
+function setView(print) {
+  document.body.classList.toggle('view-print', print);
+  document.querySelectorAll('#view-toggle .vt-btn').forEach(b => {
+    const on = (b.dataset.view === 'print') === print;
+    b.classList.toggle('active', on);
+    b.setAttribute('aria-pressed', on);
+  });
+}
+
+document.getElementById('view-toggle').addEventListener('click', e => {
+  const b = e.target.closest('.vt-btn');
+  if (b) setView(b.dataset.view === 'print');
+});
+setView(false);
+document.getElementById('btn-print').addEventListener('click', () => window.print());
+document.getElementById('btn-copy-word').addEventListener('click', e => {
+  const btn = e.currentTarget;
+  const sheet = document.getElementById('pv-sheet');
+  const sel = window.getSelection();
+  const range = document.createRange();
+  range.selectNodeContents(sheet);
+  sel.removeAllRanges(); sel.addRange(range);
+  let ok = false;
+  try { ok = document.execCommand('copy'); } catch (_) {}
+  sel.removeAllRanges();
+  btn.classList.toggle('copied', ok);
+  btn.innerHTML = ok ? '<i class="fa fa-check text-[10px]"></i> Copiado'
+                     : '<i class="fa fa-copy text-[10px]"></i> Selecione e copie (Ctrl+C)';
+  setTimeout(() => {
+    btn.classList.remove('copied');
+    btn.innerHTML = '<i class="fa fa-copy text-[10px]"></i> Copiar para Word';
+  }, 2000);
+});
 
 init();
 </script>
