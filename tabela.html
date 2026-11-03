@@ -102,6 +102,9 @@
     .pv-sheet th { background: #e5e7eb; font-weight: 700; }
     .pv-sheet a { color: #0645ad; text-decoration: underline; }
     .pv-sheet tr:hover td { background: #fff; }
+    .pv-sheet tr.day-first td { border-top: 2.5px solid #000; }
+    .pv-sheet td.day-cell { font-weight: 700; text-align: center; }
+    .pv-sheet tr.day-alt td, .pv-sheet tr.day-alt:hover td { background: #eef2f7; }
     @page { size: A4 portrait; margin: 10mm; }
     @media print {
       header, footer, #table-main, #filtros, .pv-toolbar { display: none !important; }
@@ -111,7 +114,7 @@
       .pv-sheet h3 { margin: 3mm 0 1mm; }
       .pv-sheet { width: 100% !important; max-width: 100% !important; overflow: visible; padding: 0; box-shadow: none; margin: 0; }
       .pv-sheet tr { break-inside: avoid; }
-      .pv-sheet th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .pv-sheet th, .pv-sheet td { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
     /* scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -497,12 +500,22 @@ function renderPrintView() {
       <table>
         <colgroup><col style="width:10%"><col style="width:15%"><col style="width:39%"><col style="width:36%"></colgroup>
         <thead><tr><th>Data</th><th>Séries</th><th>Matéria(s)</th><th>Link</th></tr></thead>
-        <tbody>${rows.map(r => `<tr>
-          <td>${esc(fmtData(r.data))}</td>
+        <tbody>${(() => {
+          let dayIdx = -1, prev = null;
+          const counts = {};
+          rows.forEach(r => counts[r.data] = (counts[r.data] || 0) + 1);
+          return rows.map(r => {
+            const first = r.data !== prev;
+            if (first) dayIdx++;
+            prev = r.data;
+            return `<tr class="${first ? 'day-first ' : ''}${dayIdx % 2 ? 'day-alt' : ''}">
+          ${first ? `<td class="day-cell" rowspan="${counts[r.data]}">${esc(fmtData(r.data))}</td>` : ''}
           <td>${esc(r.serie)}</td>
           <td>${esc(r.materias.join(', '))}</td>
           <td>${r.link ? `<a href="${esc(r.link)}">${esc(r.link)}</a>` : 'Em breve'}</td>
-        </tr>`).join('')}</tbody>
+        </tr>`;
+          }).join('');
+        })()}</tbody>
       </table>`;
   }
   document.getElementById('pv-sheet').innerHTML = html;
