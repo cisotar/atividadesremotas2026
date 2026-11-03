@@ -385,7 +385,7 @@
 
       const periodLabel = { today: 'Hoje (' + todayLabel() + ')', past: 'Dias anteriores', series: 'Todos os dias [teste local]' }[state.period];
       $('results-summary').textContent = state.period === 'all'
-        ? 'Todas as provas [teste local]'
+        ? 'Todas as provas'
         : LEVELS.find(l => l.key === state.level).label + ' › ' + g.name + ' › ' + periodLabel;
       const showTools = !today && periodCards.length > 0;
       $('toolbar').classList.toggle('hidden', !showTools && !all);
@@ -459,17 +459,17 @@
       if (state.step === 1) {
         return {
           question: 'Você quer ver as provas de qual segmento?',
-          cols: IS_LOCAL ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2',
+          cols: 'grid-cols-1 sm:grid-cols-3',
           options: [
             ...LEVELS.map(lv => ({
               icon: lv.icon, label: lv.label,
               pick: () => { state.level = lv.key; state.group = null; state.period = null; state.day = 'all'; state.subject = 'all'; },
             })),
-            // TESTE LOCAL: pula direto para os resultados com todas as provas
-            ...(IS_LOCAL ? [{
-              icon: 'fa-list', label: 'Ver todas as provas', sub: 'teste local', goto: 4,
+            // Pula direto para os resultados com todas as provas
+            {
+              icon: 'fa-list', label: 'Ver todas as provas', goto: 4,
               pick: () => { state.level = null; state.group = null; state.period = 'all'; state.day = 'all'; state.subject = 'all'; state.levelFilter = 'all'; state.groupFilter = 'all'; },
-            }] : []),
+            },
           ],
         };
       }
@@ -489,12 +489,12 @@
         options: [
           { icon: 'fa-calendar-day', label: 'Hoje', sub: todayLabel(), pick: () => { state.period = 'today'; } },
           { icon: 'fa-clock-rotate-left', label: 'Dias anteriores', pick: () => { state.period = 'past'; } },
-          // TESTE LOCAL: não aparecem em produção
+          // TESTE LOCAL: só em localhost
           ...(IS_LOCAL ? [
             { icon: 'fa-calendar-week', label: 'Todos os dias desta série', sub: 'teste local', pick: () => { state.period = 'series'; } },
-            { icon: 'fa-house', label: 'Retornar ao início', sub: 'teste local', goto: 1,
-              pick: () => { state.level = null; state.group = null; state.period = null; state.day = 'all'; state.subject = 'all'; } },
           ] : []),
+          { icon: 'fa-house', label: 'Retornar ao início', goto: 1,
+            pick: () => { state.level = null; state.group = null; state.period = null; state.day = 'all'; state.subject = 'all'; } },
         ],
       };
     }
