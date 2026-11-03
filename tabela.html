@@ -89,15 +89,16 @@
     .pv-sheet {
       background: #fff; color: #000; font-family: Arial, Helvetica, sans-serif;
       width: 210mm; max-width: 100%; margin: 0 auto; padding: 12mm 10mm;
-      box-sizing: border-box; box-shadow: 0 2px 16px rgba(0,0,0,.5);
+      box-sizing: border-box; overflow-x: hidden; box-shadow: 0 2px 16px rgba(0,0,0,.5);
     }
     .pv-sheet h2 { font-size: 15pt; font-weight: 700; text-align: center; margin: 0 0 4mm; color: #000; }
     .pv-sheet h3 { font-size: 11pt; font-weight: 700; margin: 4mm 0 1.5mm; color: #000; }
     .pv-sheet table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 8.5pt; }
     .pv-sheet th, .pv-sheet td {
       border: 1px solid #000; padding: 0.7mm 1.8mm; line-height: 1.15; text-align: left; vertical-align: middle;
-      white-space: normal; background: #fff; color: #000; word-break: break-word;
+      white-space: normal; background: #fff; color: #000; overflow-wrap: anywhere; word-break: break-word; min-width: 0;
     }
+    .pv-sheet thead { display: table-header-group; }
     .pv-sheet th { background: #e5e7eb; font-weight: 700; }
     .pv-sheet a { color: #0645ad; text-decoration: underline; }
     .pv-sheet tr:hover td { background: #fff; }
@@ -108,7 +109,7 @@
       #print-main { display: block !important; padding: 0 !important; overflow: visible !important; }
       .pv-sheet h2 { font-size: 13pt; margin-bottom: 2mm; }
       .pv-sheet h3 { margin: 3mm 0 1mm; }
-      .pv-sheet { width: auto; padding: 0; box-shadow: none; margin: 0; }
+      .pv-sheet { width: 100% !important; max-width: 100% !important; overflow: visible; padding: 0; box-shadow: none; margin: 0; }
       .pv-sheet tr { break-inside: avoid; }
       .pv-sheet th { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     }
@@ -121,7 +122,7 @@
 <body class="min-h-screen font-sans flex flex-col">
 
   <!-- Header -->
-  <header class="bg-ink border-b border-mist/10 px-6 py-4 flex items-center justify-between">
+  <header class="bg-ink border-b border-mist/10 px-6 py-4 flex items-center justify-between flex-wrap gap-3">
     <div class="flex items-center gap-4">
       <a href="index.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border-2 border-yellow-400 text-yellow-300 hover:bg-yellow-400/10 transition-all duration-200 whitespace-nowrap">
         <i class="fa fa-arrow-left text-xs"></i> App
