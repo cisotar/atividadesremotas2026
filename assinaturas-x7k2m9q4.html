@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <title>Conferência de Links – Simulados SARESP</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #e5e7eb; font-family: Arial, Helvetica, sans-serif; color: #000; }
+    .toolbar { display: flex; gap: 8px; justify-content: center; padding: 14px; }
+    .toolbar button {
+      font: 600 13px Arial, sans-serif; padding: 7px 16px; border-radius: 6px; cursor: pointer;
+      border: 1px solid #1F5FBF; background: #1F5FBF; color: #fff;
+    }
+    .toolbar button.sec { background: #fff; color: #1F5FBF; }
+    .sheet {
+      background: #fff; width: 210mm; max-width: 100%; margin: 0 auto 24px; padding: 12mm 10mm;
+      overflow-x: hidden; box-shadow: 0 2px 16px rgba(0,0,0,.25);
+    }
+    h1 { font-size: 14pt; text-align: center; margin: 0 0 3mm; }
+    .decl { font-size: 9.5pt; line-height: 1.4; border: 1.5px solid #000; padding: 2.5mm 3mm; margin: 0 0 4mm; text-align: justify; }
+    h2 { font-size: 11pt; margin: 4mm 0 1.5mm; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 8.5pt; }
+    thead { display: table-header-group; }
+    th, td {
+      border: 1px solid #000; padding: 1mm 1.8mm; text-align: left; vertical-align: middle;
+      line-height: 1.15; overflow-wrap: anywhere; word-break: break-word; min-width: 0;
+      -webkit-print-color-adjust: exact; print-color-adjust: exact;
+    }
+    th { background: #e5e7eb; font-weight: 700; }
+    tr { break-inside: avoid; }
+    tbody tr { height: 13mm; }
+    tr.day-first td { border-top: 2.5px solid #000; }
+    tr.day-alt td.alt { background: #eef2f7; }
+    td.day-cell { font-weight: 700; text-align: center; }
+    td.sign { background: #fff !important; }
+    a { color: #0645ad; text-decoration: underline; }
+    .msg { text-align: center; padding: 40px; font-size: 14px; }
+    @page { size: A4 portrait; margin: 10mm; }
+    @media print {
+      html, body { background: #fff; }
+      .toolbar, .msg { display: none !important; }
+      .sheet { width: 100%; max-width: 100%; padding: 0; margin: 0; box-shadow: none; overflow: visible; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button id="btn-copy" class="sec" type="button">Copiar para Word</button>
+    <button id="btn-print" type="button">Imprimir</button>
+  </div>
+  <div id="msg" class="msg">Carregando calendário…</div>
+  <div id="sheet" class="sheet" hidden></div>
+
+<script>
+const SOURCES = [
+  'CALENDARIO.md',
+  'https://raw.githubusercontent.com/cisotar/atividadesremotas2026/main/CALENDARIO.md'
+];
+
+const esc = s => String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const norm = s => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const dateVal = d => { const m = String(d).match(/(\d{2})\.(\d{2})/); return m ? +m[2] * 100 + +m[1] : 0; };
+
+function parseCalendar(md) {
+  const rows = [];
+  let nivel = '', headerCols = [];
+  for (const raw of md.split('\n')) {
+    const line = raw.trim();
+    if (/^##\s/.test(line)) {
+      const t = norm(line);
+      if (t.includes('fundamental')) nivel = 'Ensino Fundamental';
+      else if (t.includes('medio')) nivel = 'Ensino Médio';
+      headerCols = [];
+      continue;
+    }
+    if (/^\|[-| ]+\|$/.test(line)) continue;
+    if (!line.startsWith('|')) continue;
+    const cells = line.split('|').slice(1, -1).map(c => c.trim());
+    const first = norm(cells[0] ?? '');
+    if (first === 'data' || first === 'dia') { headerCols = cells.map(c => norm(c).replace(/\s+/g, '')); continue; }
+    if (!headerCols.length) continue;
+    const get = k => { const i = headerCols.indexOf(k); return i >= 0 ? cells[i] ?? '' : ''; };
+    const link = get('link');
+    rows.push({
+      nivel, data: get('data'), serie: get('serie'),
+      materias: get('materia').split(',').map(s => s.trim()).filter(Boolean),
+      link: /^https?:\/\//i.test(link) ? link : '',
+    });
+  }
+  return rows;
+}
+
+async function loadCalendar() {
+  for (const src of SOURCES) {
+    try { const r = await fetch(src, { cache: 'no-cache' }); if (r.ok) return await r.text(); } catch (_) {}
+  }
+  throw new Error('Não foi possível carregar o CALENDARIO.md.');
+}
+
+function render(all) {
+  const cmp = (a, b) => dateVal(a.data) - dateVal(b.data) || a.serie.localeCompare(b.serie, 'pt-BR', { numeric: true });
+  let html = `<h1>Conferência de Links – Simulados SARESP</h1>
+    <p class="decl"><strong>Declaração:</strong> ao assinar na coluna correspondente, o(a) professor(a) declara que
+    conferiu e <strong>concorda que o link descrito nesta linha aponta para a avaliação correta</strong>
+    da(s) série(s) e matéria(s) indicada(s), na data informada.</p>`;
+
+  for (const g of ['Ensino Fundamental', 'Ensino Médio']) {
+    const rows = all.filter(r => r.nivel === g).sort(cmp);
+    if (!rows.length) continue;
+    const counts = {};
+    rows.forEach(r => counts[r.data] = (counts[r.data] || 0) + 1);
+    let idx = -1, prev = null;
+    html += `<h2>${esc(g)}</h2><table>
+      <colgroup><col style="width:8%"><col style="width:11%"><col style="width:20%"><col style="width:34%"><col style="width:27%"></colgroup>
+      <thead><tr><th>Data</th><th>Séries</th><th>Matéria(s)</th><th>Link</th><th>Assinatura do professor</th></tr></thead>
+      <tbody>${rows.map(r => {
+        const first = r.data !== prev; if (first) idx++; prev = r.data;
+        const alt = idx % 2 ? ' alt' : '';
+        return `<tr class="${first ? 'day-first ' : ''}${idx % 2 ? 'day-alt' : ''}">
+          ${first ? `<td class="day-cell${alt}" rowspan="${counts[r.data]}" style="${idx % 2 ? 'background:#eef2f7' : ''}">${esc(r.data.replace('.', '/'))}</td>` : ''}
+          <td class="${alt.trim()}" style="${idx % 2 ? 'background:#eef2f7' : ''}">${esc(r.serie)}</td>
+          <td class="${alt.trim()}" style="${idx % 2 ? 'background:#eef2f7' : ''}">${esc(r.materias.join(', '))}</td>
+          <td class="${alt.trim()}" style="${idx % 2 ? 'background:#eef2f7' : ''}">${r.link ? `<a href="${esc(r.link)}">${esc(r.link)}</a>` : 'Em breve'}</td>
+          <td class="sign">&nbsp;</td>
+        </tr>`;
+      }).join('')}</tbody></table>`;
+  }
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = html;
+  sheet.hidden = false;
+  document.getElementById('msg').hidden = true;
+}
+
+document.getElementById('btn-print').addEventListener('click', () => window.print());
+document.getElementById('btn-copy').addEventListener('click', e => {
+  const btn = e.currentTarget, sel = getSelection(), range = document.createRange();
+  range.selectNodeContents(document.getElementById('sheet'));
+  sel.removeAllRanges(); sel.addRange(range);
+  let ok = false; try { ok = document.execCommand('copy'); } catch (_) {}
+  sel.removeAllRanges();
+  btn.textContent = ok ? 'Copiado' : 'Selecione e copie (Ctrl+C)';
+  setTimeout(() => btn.textContent = 'Copiar para Word', 2000);
+});
+
+loadCalendar().then(md => render(parseCalendar(md))).catch(err => {
+  document.getElementById('msg').textContent = err.message;
+});
+</script>
+</body>
+</html>
