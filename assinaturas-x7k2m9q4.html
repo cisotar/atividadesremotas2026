@@ -20,7 +20,6 @@
     }
     h1 { font-size: 14pt; text-align: center; margin: 0 0 3mm; }
     .decl { font-size: 9.5pt; line-height: 1.4; border: 1.5px solid #000; padding: 2.5mm 3mm; margin: 0 0 4mm; text-align: justify; }
-    .hoje { text-align: right; font-size: 9.5pt; margin: 0 0 2mm; }
     h2 { font-size: 11pt; margin: 4mm 0 1.5mm; }
     table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 8.5pt; }
     thead { display: table-header-group; }
@@ -103,9 +102,8 @@ async function loadCalendar() {
 function render(all) {
   const cmp = (a, b) => dateVal(a.data) - dateVal(b.data) || a.serie.localeCompare(b.serie, 'pt-BR', { numeric: true });
   const hoje = new Date().toLocaleDateString('pt-BR');
-  let html = `<p class="hoje"><strong>Data:</strong> ${hoje}</p>
-    <h1>Conferência de Links – Simulados SARESP</h1>
-    <p class="decl"><strong>Declaração:</strong> ao assinar na coluna correspondente, o(a) professor(a) declara que
+  let html = `<h1>Conferência de Links – Simulados SARESP</h1>
+    <p class="decl"><strong>Declaração:</strong> em <strong>${hoje}</strong>, ao assinar na coluna correspondente, o(a) professor(a) declara que
     conferiu e <strong>concorda que o link descrito nesta linha aponta para a avaliação correta</strong>
     da(s) série(s) e matéria(s) indicada(s), na data de aplicação informada na linha.</p>`;
 
