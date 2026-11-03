@@ -89,9 +89,14 @@
         <p id="results-summary" class="text-sm sm:text-base font-semibold text-snow"></p>
       </div>
 
-      <!-- Filtro por matéria (só em "Dias anteriores") -->
-      <div id="toolbar" class="bg-panel p-4 sm:p-5 rounded-2xl shadow-sm border border-mist/20 mb-8 flex justify-end sticky top-4 z-30 backdrop-blur-lg">
-        <div class="relative shrink-0 w-full sm:w-auto">
+      <!-- Segmento (só em "Todas as provas") e matéria (só fora de "Hoje") -->
+      <div id="toolbar" class="bg-panel p-4 sm:p-5 rounded-2xl shadow-sm border border-mist/20 mb-8 flex flex-wrap items-center justify-between gap-3 sticky top-4 z-30 backdrop-blur-lg">
+        <!-- Pills de segmento e de ano/série (só em "Todas as provas") -->
+        <div id="series-filters" class="hidden min-w-0 max-w-full flex flex-col gap-3">
+          <div id="level-filters" class="flex flex-wrap items-center gap-2"></div>
+          <div id="year-filters" class="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none"></div>
+        </div>
+        <div class="relative shrink-0 w-full sm:w-auto sm:ml-auto">
           <i class="fa-solid fa-book absolute left-3.5 top-1/2 -translate-y-1/2 text-mist pointer-events-none"></i>
           <select
             id="subject-select"
@@ -154,7 +159,7 @@
     ];
 
     // step: 1 = segmento, 2 = série, 3 = período, 4 = resultados
-    const state = { step: 1, level: null, group: null, period: null, day: 'all', subject: 'all' };
+    const state = { step: 1, level: null, group: null, period: null, day: 'all', subject: 'all', levelFilter: 'all', groupFilter: 'all' };
     let groups = [];
 
     const $ = id => document.getElementById(id);
@@ -312,6 +317,14 @@
     }
 
     // ---------- Filtros ----------
+    const PILL_BASE = "level-pill inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 whitespace-nowrap ";
+    const PILL_ON = PILL_BASE + "bg-brand text-white border-brand shadow-sm";
+    const PILL_OFF = PILL_BASE + "bg-panel text-snow border-mist/30 hover:bg-ink";
+    const LEVEL_PILLS = [{ key: 'all', label: 'Todos', icon: 'fa-border-all' }, ...LEVELS];
+    const YEAR_BTN_BASE = "filter-btn px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ";
+    const YEAR_BTN_ON = YEAR_BTN_BASE + "active-filter bg-brand text-white shadow-sm hover:bg-brand-700";
+    const YEAR_BTN_OFF = YEAR_BTN_BASE + "text-snow hover:bg-ink";
+    const groupPillLabel = g => g.level === 'fund' ? g.name + 's' : g.name + ' EM';
     const DAY_CHIP_BASE = "day-btn px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap border ";
     const DAY_CHIP_ON = DAY_CHIP_BASE + "bg-brand text-white border-brand shadow-sm";
     const DAY_CHIP_OFF = DAY_CHIP_BASE + "bg-panel text-snow border-mist/30 hover:bg-ink";
@@ -327,7 +340,10 @@
     const todayDate = () => new Date();
     const todayKey = () => { const d = todayDate(); return (d.getMonth() + 1) * 100 + d.getDate(); };
     const todayLabel = () => { const d = todayDate(); return String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0'); };
+    // TESTE LOCAL: períodos extras ('series' e 'all') só existem em localhost / file://
+    const IS_LOCAL = ['localhost', '127.0.0.1', '[::1]', ''].includes(location.hostname);
     const inPeriod = c => {
+      if (state.period === 'series' || state.period === 'all') return true;
       const k = dateKey(c);
       return k !== null && (state.period === 'today' ? k === todayKey() : k < todayKey());
     };
@@ -352,7 +368,11 @@
     // Chips de dia e opções de matéria só mostram o que existe para a série e o período escolhidos
     function render() {
       const g = currentGroup();
-      const periodCards = g.cards.filter(inPeriod);
+      const all = state.period === 'all';
+      const levelGroups = groups.filter(sg => state.levelFilter === 'all' || sg.level === state.levelFilter);
+      if (state.groupFilter !== 'all' && !levelGroups.some(sg => sg.key === state.groupFilter)) state.groupFilter = 'all';
+      const scope = all ? levelGroups.filter(sg => state.groupFilter === 'all' || sg.key === state.groupFilter) : [g];
+      const periodCards = scope.flatMap(sg => sg.cards.filter(inPeriod));
       const today = state.period === 'today';
 
       const days = new Set(), subjects = new Set();
@@ -363,10 +383,30 @@
       if (state.day !== 'all' && !days.has(state.day)) state.day = 'all';
       if (state.subject !== 'all' && !subjects.has(state.subject)) state.subject = 'all';
 
-      $('results-summary').textContent = LEVELS.find(l => l.key === state.level).label + ' › ' + g.name + ' › ' +
-        (today ? 'Hoje (' + todayLabel() + ')' : 'Dias anteriores');
+      const periodLabel = { today: 'Hoje (' + todayLabel() + ')', past: 'Dias anteriores', series: 'Todos os dias [teste local]' }[state.period];
+      $('results-summary').textContent = state.period === 'all'
+        ? 'Todas as provas [teste local]'
+        : LEVELS.find(l => l.key === state.level).label + ' › ' + g.name + ' › ' + periodLabel;
       const showTools = !today && periodCards.length > 0;
-      $('toolbar').classList.toggle('hidden', !showTools);
+      $('toolbar').classList.toggle('hidden', !showTools && !all);
+      // Pills de segmento (recriadas a cada render)
+      const lvBox = $('level-filters'), yrBox = $('year-filters');
+      $('series-filters').classList.toggle('hidden', !all);
+      lvBox.textContent = '';
+      yrBox.textContent = '';
+      if (all) LEVEL_PILLS.forEach(lv => {
+        const on = lv.key === state.levelFilter;
+        const btn = makeButton(on ? PILL_ON : PILL_OFF, '', () => { state.levelFilter = lv.key; state.groupFilter = 'all'; render(); }, { level: lv.key });
+        btn.innerHTML = '<i class="fa-solid ' + lv.icon + '"></i>' + lv.label;
+        btn.setAttribute('aria-pressed', on);
+        lvBox.appendChild(btn);
+      });
+      if (all) [{ key: 'all', name: 'Todos os Anos' }, ...levelGroups].forEach(sg => {
+        const on = sg.key === state.groupFilter;
+        const btn = makeButton(on ? YEAR_BTN_ON : YEAR_BTN_OFF, sg.key === 'all' ? sg.name : groupPillLabel(sg), () => { state.groupFilter = sg.key; render(); }, { group: sg.key });
+        btn.setAttribute('aria-pressed', on);
+        yrBox.appendChild(btn);
+      });
       $('day-nav').classList.toggle('hidden', !showTools);
 
       // Chips de dia (recriados a cada render: dependem da série e do período)
@@ -394,15 +434,21 @@
       });
       select.value = state.subject;
 
-      const cards = periodCards.filter(c =>
-        (state.day === 'all' || c.day === state.day) &&
-        (state.subject === 'all' || c.subjects.includes(state.subject)));
-      $('simulados-container').innerHTML = cards.length ? renderSection(g, cards) : '';
-      $('no-results-title').textContent = today ? 'Nenhuma prova hoje' : 'Nenhuma prova em dias anteriores';
+      let total = 0;
+      $('simulados-container').innerHTML = scope.map(sg => {
+        const cards = sg.cards.filter(c => inPeriod(c) &&
+          (state.day === 'all' || c.day === state.day) &&
+          (state.subject === 'all' || c.subjects.includes(state.subject)));
+        total += cards.length;
+        return cards.length ? renderSection(sg, cards) : '';
+      }).join('');
+      $('no-results-title').textContent = today ? 'Nenhuma prova hoje' : 'Nenhuma prova encontrada';
       $('no-results-text').textContent = today
         ? 'Não há provas de ' + g.name + ' para hoje (' + todayLabel() + ').'
-        : 'Ainda não há provas anteriores a hoje para ' + g.name + ', ou nenhuma atende ao filtro escolhido.';
-      $('no-results').classList.toggle('hidden', cards.length > 0);
+        : state.period === 'past'
+          ? 'Ainda não há provas anteriores a hoje para ' + g.name + ', ou nenhuma atende ao filtro escolhido.'
+          : 'Nenhuma prova atende ao filtro escolhido.';
+      $('no-results').classList.toggle('hidden', total > 0);
     }
 
     // ---------- Wizard ----------
@@ -413,11 +459,18 @@
       if (state.step === 1) {
         return {
           question: 'Você quer ver as provas de qual segmento?',
-          cols: 'grid-cols-1 sm:grid-cols-2',
-          options: LEVELS.map(lv => ({
-            icon: lv.icon, label: lv.label,
-            pick: () => { state.level = lv.key; state.group = null; state.period = null; state.day = 'all'; state.subject = 'all'; },
-          })),
+          cols: IS_LOCAL ? 'grid-cols-1 sm:grid-cols-3' : 'grid-cols-1 sm:grid-cols-2',
+          options: [
+            ...LEVELS.map(lv => ({
+              icon: lv.icon, label: lv.label,
+              pick: () => { state.level = lv.key; state.group = null; state.period = null; state.day = 'all'; state.subject = 'all'; },
+            })),
+            // TESTE LOCAL: pula direto para os resultados com todas as provas
+            ...(IS_LOCAL ? [{
+              icon: 'fa-list', label: 'Ver todas as provas', sub: 'teste local', goto: 4,
+              pick: () => { state.level = null; state.group = null; state.period = 'all'; state.day = 'all'; state.subject = 'all'; state.levelFilter = 'all'; state.groupFilter = 'all'; },
+            }] : []),
+          ],
         };
       }
       if (state.step === 2) {
@@ -436,6 +489,12 @@
         options: [
           { icon: 'fa-calendar-day', label: 'Hoje', sub: todayLabel(), pick: () => { state.period = 'today'; } },
           { icon: 'fa-clock-rotate-left', label: 'Dias anteriores', pick: () => { state.period = 'past'; } },
+          // TESTE LOCAL: não aparecem em produção
+          ...(IS_LOCAL ? [
+            { icon: 'fa-calendar-week', label: 'Todos os dias desta série', sub: 'teste local', pick: () => { state.period = 'series'; } },
+            { icon: 'fa-house', label: 'Retornar ao início', sub: 'teste local', goto: 1,
+              pick: () => { state.level = null; state.group = null; state.period = null; state.day = 'all'; state.subject = 'all'; } },
+          ] : []),
         ],
       };
     }
@@ -473,7 +532,7 @@
       const grid = document.createElement('div');
       grid.className = 'grid gap-4 max-w-3xl mx-auto ' + cfg.cols;
       cfg.options.forEach(o => {
-        const btn = makeButton(WIZ_OPT_CLASS, '', () => { o.pick(); state.step++; renderWizard(); });
+        const btn = makeButton(WIZ_OPT_CLASS, '', () => { o.pick(); state.step = o.goto || state.step + 1; renderWizard(); });
         btn.innerHTML = '<i class="fa-solid ' + o.icon + ' text-2xl text-mist"></i><span>' + esc(o.label) + '</span>' +
           (o.sub ? '<span class="text-xs font-medium text-mist">' + esc(o.sub) + '</span>' : '');
         grid.appendChild(btn);
@@ -487,7 +546,10 @@
     }
 
     function goBack() {
-      if (state.step > 1) { state.step--; renderWizard(); }
+      if (state.step === 4 && state.period === 'all') state.step = 1;
+      else if (state.step > 1) state.step--;
+      else return;
+      renderWizard();
     }
 
     // ---------- Copiar link ----------
