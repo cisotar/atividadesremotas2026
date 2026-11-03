@@ -66,38 +66,51 @@
   <!-- Conteúdo Principal -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-32 sm:pb-24">
 
-    <!-- Pills: Nível de Ensino -->
-    <div id="level-filters" class="flex flex-wrap items-center gap-2 mb-4">
-      <span class="text-xs font-semibold uppercase tracking-wider text-mist mr-1"><i class="fa-solid fa-layer-group"></i> Nível</span>
+    <!-- Link visão simplificada -->
+    <div class="flex justify-end mb-4">
+      <a href="tabela.html" class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border-2 border-yellow-400 text-yellow-300 hover:bg-yellow-400/10 transition-all duration-200 whitespace-nowrap">
+        <i class="fa-solid fa-table text-xs"></i> Visão simplificada
+      </a>
     </div>
 
-    <!-- Barra de Ferramentas: Filtros por Ano/Série e Matéria -->
-    <div class="bg-panel p-4 sm:p-5 rounded-2xl shadow-sm border border-mist/20 mb-8 space-y-4 md:space-y-0 md:flex md:items-center md:justify-between gap-4 sticky top-4 z-30 backdrop-blur-lg">
+    <!-- Wizard: segmento → série → período -->
+    <section id="wizard" class="bg-panel p-5 sm:p-8 rounded-2xl shadow-sm border border-mist/20" aria-live="polite">
+      <p class="text-center text-mist py-10">Carregando simulados…</p>
+    </section>
 
-      <!-- Filtros por Ano/Série -->
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-2 md:pb-0 scrollbar-none" id="year-filters"></div>
+    <!-- Resultados (após as 3 etapas) -->
+    <div id="results-view" class="hidden">
 
-      <!-- Dropdown por Matéria -->
-      <div class="relative shrink-0">
-        <i class="fa-solid fa-book absolute left-3.5 top-1/2 -translate-y-1/2 text-mist pointer-events-none"></i>
-        <select
-          id="subject-select"
-          aria-label="Filtrar por matéria"
-          class="appearance-none pl-10 pr-8 py-2 text-sm bg-ink text-snow border border-mist/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand transition-all duration-200 cursor-pointer"
-        >
-          <option value="all">Todas as matérias</option>
-        </select>
-        <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-mist text-xs pointer-events-none"></i>
+      <!-- Resumo das escolhas + voltar -->
+      <div class="flex flex-wrap items-center gap-3 mb-6">
+        <button type="button" id="results-back" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold bg-panel border border-mist/40 text-snow hover:bg-snow hover:text-ink transition-all duration-200">
+          <i class="fa-solid fa-arrow-left text-xs"></i> Voltar
+        </button>
+        <p id="results-summary" class="text-sm sm:text-base font-semibold text-snow"></p>
       </div>
-    </div>
 
-    <!-- Navegação por Dia -->
-    <div class="mb-8 -mt-2">
-      <div class="flex items-center gap-2 mb-2 text-xs font-semibold uppercase tracking-wider text-mist">
-        <i class="fa-regular fa-calendar-days"></i> Ver por dia
+      <!-- Filtro por matéria (só em "Dias anteriores") -->
+      <div id="toolbar" class="bg-panel p-4 sm:p-5 rounded-2xl shadow-sm border border-mist/20 mb-8 flex justify-end sticky top-4 z-30 backdrop-blur-lg">
+        <div class="relative shrink-0 w-full sm:w-auto">
+          <i class="fa-solid fa-book absolute left-3.5 top-1/2 -translate-y-1/2 text-mist pointer-events-none"></i>
+          <select
+            id="subject-select"
+            aria-label="Filtrar por matéria"
+            class="appearance-none w-full pl-10 pr-8 py-2 text-sm bg-ink text-snow border border-mist/40 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand transition-all duration-200 cursor-pointer"
+          >
+            <option value="all">Todas as matérias</option>
+          </select>
+          <i class="fa-solid fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-mist text-xs pointer-events-none"></i>
+        </div>
       </div>
-      <div id="day-filters" class="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none"></div>
-    </div>
+
+      <!-- Navegação por Dia (só em "Dias anteriores") -->
+      <div id="day-nav" class="mb-8 -mt-2">
+        <div class="flex items-center gap-2 mb-2 text-xs font-semibold uppercase tracking-wider text-mist">
+          <i class="fa-regular fa-calendar-days"></i> Ver por dia
+        </div>
+        <div id="day-filters" class="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none"></div>
+      </div>
 
     <!-- Container dos Cards de Simulados (gerado a partir do CALENDARIO.md) -->
     <div id="simulados-container" class="space-y-10">
@@ -109,9 +122,11 @@
       <div class="w-16 h-16 mx-auto bg-ink text-mist rounded-full flex items-center justify-center text-2xl mb-4">
         <i class="fa-solid fa-filter-circle-xmark"></i>
       </div>
-      <h3 class="text-lg font-bold text-snow mb-1">Nenhum simulado encontrado</h3>
-      <p class="text-sm text-mist max-w-sm mx-auto">Tente ajustar os filtros de ano, dia ou matéria.</p>
+      <h3 id="no-results-title" class="text-lg font-bold text-snow mb-1">Nenhum simulado encontrado</h3>
+      <p id="no-results-text" class="text-sm text-mist max-w-sm mx-auto">Tente ajustar os filtros de dia ou matéria.</p>
     </div>
+
+    </div><!-- /results-view -->
 
   </main>
 
@@ -134,17 +149,16 @@
     ];
 
     const LEVELS = [
-      { key: 'all', label: 'Todos', icon: 'fa-border-all' },
       { key: 'fund', label: 'Ensino Fundamental', icon: 'fa-book-open' },
       { key: 'medio', label: 'Ensino Médio', icon: 'fa-user-graduate' },
     ];
 
-    const state = { level: 'all', group: 'all', day: 'all', subject: 'all' };
+    // step: 1 = segmento, 2 = série, 3 = período, 4 = resultados
+    const state = { step: 1, level: null, group: null, period: null, day: 'all', subject: 'all' };
     let groups = [];
 
     const $ = id => document.getElementById(id);
     const esc = s => String(s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
-    const levelMatches = level => state.level === 'all' || state.level === level;
 
     // ---------- Leitura do CALENDARIO.md ----------
     const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
@@ -277,10 +291,6 @@
       '</div>';
     }
 
-    function groupPillLabel(g) {
-      return g.level === 'fund' ? g.name + 's' : g.name + ' EM';
-    }
-
     function renderSection(g, cards) {
       const fund = g.level === 'fund';
       const modalities = [...new Set(g.cards.map(c => c.modalidade).filter(Boolean))];
@@ -302,12 +312,6 @@
     }
 
     // ---------- Filtros ----------
-    const PILL_BASE = "level-pill inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border transition-all duration-200 whitespace-nowrap ";
-    const PILL_ON = PILL_BASE + "bg-brand text-white border-brand shadow-sm";
-    const PILL_OFF = PILL_BASE + "bg-panel text-snow border-mist/30 hover:bg-ink";
-    const YEAR_BTN_BASE = "filter-btn px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ";
-    const YEAR_BTN_ON = YEAR_BTN_BASE + "active-filter bg-brand text-white shadow-sm hover:bg-brand-700";
-    const YEAR_BTN_OFF = YEAR_BTN_BASE + "text-snow hover:bg-ink";
     const DAY_CHIP_BASE = "day-btn px-3.5 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap border ";
     const DAY_CHIP_ON = DAY_CHIP_BASE + "bg-brand text-white border-brand shadow-sm";
     const DAY_CHIP_OFF = DAY_CHIP_BASE + "bg-panel text-snow border-mist/30 hover:bg-ink";
@@ -317,6 +321,17 @@
       const d = c.date.match(/^(\d{1,2})\.(\d{1,2})/);
       return [+n, d ? +d[2] * 100 + +d[1] : Infinity];
     }
+
+    // Datas do calendário são "DD.MM" (sem ano): compara como mês*100+dia
+    const dateKey = c => { const m = c.date.match(/^(\d{1,2})\.(\d{1,2})/); return m ? +m[2] * 100 + +m[1] : null; };
+    const todayDate = () => new Date();
+    const todayKey = () => { const d = todayDate(); return (d.getMonth() + 1) * 100 + d.getDate(); };
+    const todayLabel = () => { const d = todayDate(); return String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0'); };
+    const inPeriod = c => {
+      const k = dateKey(c);
+      return k !== null && (state.period === 'today' ? k === todayKey() : k < todayKey());
+    };
+    const currentGroup = () => groups.find(g => g.key === state.group);
 
     function makeButton(className, text, onClick, data) {
       const btn = document.createElement('button');
@@ -329,70 +344,44 @@
     }
 
     function setupFilters() {
-      LEVELS.forEach(lv => {
-        const btn = makeButton(PILL_OFF, '', () => { state.level = lv.key; render(); }, { level: lv.key });
-        btn.innerHTML = '<i class="fa-solid ' + lv.icon + '"></i>' + lv.label;
-        $('level-filters').appendChild(btn);
-      });
-
-      // Link visão simplificada — pill com contorno amarelo, à direita das pills de nível
-      const tabLink = document.createElement('a');
-      tabLink.href = 'tabela.html';
-      tabLink.className = 'ml-auto inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold border-2 border-yellow-400 text-yellow-300 hover:bg-yellow-400/10 transition-all duration-200 whitespace-nowrap';
-      tabLink.innerHTML = '<i class="fa-solid fa-table text-xs"></i> Visão simplificada';
-      $('level-filters').appendChild(tabLink);
-
-      const yearBox = $('year-filters');
-      yearBox.appendChild(makeButton(YEAR_BTN_OFF, 'Todos os Anos', () => { state.group = 'all'; render(); }, { group: 'all' }));
-      groups.forEach(g => {
-        yearBox.appendChild(makeButton(YEAR_BTN_OFF, groupPillLabel(g), () => { state.group = g.key; render(); }, { group: g.key, level: g.level }));
-      });
-
-      const days = new Map();
-      groups.forEach(g => g.cards.forEach(c => { if (c.day && !days.has(c.day)) days.set(c.day, dayOrder(c)); }));
-      const sortedDays = [...days.keys()].sort((a, b) => {
-        const [na, da] = days.get(a), [nb, db] = days.get(b);
-        return na - nb || da - db || a.localeCompare(b);
-      });
-      const dayBox = $('day-filters');
-      dayBox.appendChild(makeButton(DAY_CHIP_OFF, 'Todos os dias', () => { state.day = 'all'; render(); }, { day: 'all' }));
-      sortedDays.forEach(day => {
-        dayBox.appendChild(makeButton(DAY_CHIP_OFF, day, () => { state.day = day; render(); }, { day }));
-      });
-
       $('subject-select').addEventListener('change', e => { state.subject = e.target.value; render(); });
       $('simulados-container').addEventListener('click', onCopyClick);
+      $('results-back').addEventListener('click', goBack);
     }
 
-    // Pills de ano e chips de dia/matéria só mostram opções que existem para o Nível e Ano/Série escolhidos
+    // Chips de dia e opções de matéria só mostram o que existe para a série e o período escolhidos
     function render() {
-      if (state.group !== 'all' && !groups.some(g => g.key === state.group && levelMatches(g.level))) state.group = 'all';
-      const scope = groups.filter(g => levelMatches(g.level) && (state.group === 'all' || state.group === g.key));
+      const g = currentGroup();
+      const periodCards = g.cards.filter(inPeriod);
+      const today = state.period === 'today';
 
       const days = new Set(), subjects = new Set();
-      scope.forEach(g => g.cards.forEach(c => {
+      periodCards.forEach(c => {
         if (c.day) days.add(c.day);
         c.subjects.forEach(s => subjects.add(s));
-      }));
+      });
       if (state.day !== 'all' && !days.has(state.day)) state.day = 'all';
       if (state.subject !== 'all' && !subjects.has(state.subject)) state.subject = 'all';
 
-      document.querySelectorAll('#level-filters .level-pill').forEach(btn => {
-        const on = btn.dataset.level === state.level;
-        btn.className = on ? PILL_ON : PILL_OFF;
-        btn.setAttribute('aria-pressed', on);
+      $('results-summary').textContent = LEVELS.find(l => l.key === state.level).label + ' › ' + g.name + ' › ' +
+        (today ? 'Hoje (' + todayLabel() + ')' : 'Dias anteriores');
+      const showTools = !today && periodCards.length > 0;
+      $('toolbar').classList.toggle('hidden', !showTools);
+      $('day-nav').classList.toggle('hidden', !showTools);
+
+      // Chips de dia (recriados a cada render: dependem da série e do período)
+      const dayBox = $('day-filters');
+      dayBox.textContent = '';
+      const sortedDays = [...days].sort((a, b) => {
+        const ca = periodCards.find(c => c.day === a), cb = periodCards.find(c => c.day === b);
+        const [na, da] = dayOrder(ca), [nb, db] = dayOrder(cb);
+        return na - nb || da - db || a.localeCompare(b);
       });
-      document.querySelectorAll('#year-filters .filter-btn').forEach(btn => {
-        const on = btn.dataset.group === state.group;
-        btn.style.display = (btn.dataset.group === 'all' || levelMatches(btn.dataset.level)) ? '' : 'none';
-        btn.className = on ? YEAR_BTN_ON : YEAR_BTN_OFF;
+      [['all', 'Todos os dias'], ...sortedDays.map(d => [d, d])].forEach(([day, label]) => {
+        const on = day === state.day;
+        const btn = makeButton(on ? DAY_CHIP_ON : DAY_CHIP_OFF, label, () => { state.day = day; render(); }, { day });
         btn.setAttribute('aria-pressed', on);
-      });
-      document.querySelectorAll('#day-filters .day-btn').forEach(btn => {
-        const on = btn.dataset.day === state.day;
-        btn.style.display = (btn.dataset.day === 'all' || days.has(btn.dataset.day)) ? '' : 'none';
-        btn.className = on ? DAY_CHIP_ON : DAY_CHIP_OFF;
-        btn.setAttribute('aria-pressed', on);
+        dayBox.appendChild(btn);
       });
 
       const select = $('subject-select');
@@ -405,15 +394,100 @@
       });
       select.value = state.subject;
 
-      let total = 0;
-      $('simulados-container').innerHTML = scope.map(g => {
-        const cards = g.cards.filter(c =>
-          (state.day === 'all' || c.day === state.day) &&
-          (state.subject === 'all' || c.subjects.includes(state.subject)));
-        total += cards.length;
-        return cards.length ? renderSection(g, cards) : '';
-      }).join('');
-      $('no-results').classList.toggle('hidden', total > 0);
+      const cards = periodCards.filter(c =>
+        (state.day === 'all' || c.day === state.day) &&
+        (state.subject === 'all' || c.subjects.includes(state.subject)));
+      $('simulados-container').innerHTML = cards.length ? renderSection(g, cards) : '';
+      $('no-results-title').textContent = today ? 'Nenhuma prova hoje' : 'Nenhuma prova em dias anteriores';
+      $('no-results-text').textContent = today
+        ? 'Não há provas de ' + g.name + ' para hoje (' + todayLabel() + ').'
+        : 'Ainda não há provas anteriores a hoje para ' + g.name + ', ou nenhuma atende ao filtro escolhido.';
+      $('no-results').classList.toggle('hidden', cards.length > 0);
+    }
+
+    // ---------- Wizard ----------
+    const WIZ_OPT_CLASS = "wiz-opt min-h-[96px] px-5 py-5 rounded-2xl bg-ink border-2 border-mist/30 text-snow text-lg sm:text-xl font-bold hover:border-brand hover:bg-brand/20 focus:outline-none focus:ring-2 focus:ring-brand transition-all duration-200 flex flex-col items-center justify-center gap-2 text-center";
+    const WIZ_BACK_CLASS = "inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold bg-ink border border-mist/40 text-snow hover:bg-snow hover:text-ink transition-all duration-200";
+
+    function wizardStep() {
+      if (state.step === 1) {
+        return {
+          question: 'Você quer ver as provas de qual segmento?',
+          cols: 'grid-cols-1 sm:grid-cols-2',
+          options: LEVELS.map(lv => ({
+            icon: lv.icon, label: lv.label,
+            pick: () => { state.level = lv.key; state.group = null; state.period = null; state.day = 'all'; state.subject = 'all'; },
+          })),
+        };
+      }
+      if (state.step === 2) {
+        return {
+          question: 'Você quer ver as provas relativas a qual série?',
+          cols: 'grid-cols-2 sm:grid-cols-3',
+          options: groups.filter(g => g.level === state.level).map(g => ({
+            icon: 'fa-layer-group', label: g.name,
+            pick: () => { state.group = g.key; state.period = null; state.day = 'all'; state.subject = 'all'; },
+          })),
+        };
+      }
+      return {
+        question: 'Você quer ver as provas de hoje ou de dias anteriores?',
+        cols: 'grid-cols-1 sm:grid-cols-2',
+        options: [
+          { icon: 'fa-calendar-day', label: 'Hoje', sub: todayLabel(), pick: () => { state.period = 'today'; } },
+          { icon: 'fa-clock-rotate-left', label: 'Dias anteriores', pick: () => { state.period = 'past'; } },
+        ],
+      };
+    }
+
+    function renderWizard() {
+      const results = state.step === 4;
+      $('wizard').classList.toggle('hidden', results);
+      $('results-view').classList.toggle('hidden', !results);
+      if (results) { render(); return; }
+
+      const cfg = wizardStep();
+      const box = $('wizard');
+      box.textContent = '';
+
+      const top = document.createElement('div');
+      top.className = 'flex items-center justify-between gap-3 mb-6 min-h-[2.5rem]';
+      if (state.step > 1) {
+        const back = makeButton(WIZ_BACK_CLASS, '', goBack);
+        back.innerHTML = '<i class="fa-solid fa-arrow-left text-xs"></i> Voltar';
+        top.appendChild(back);
+      } else {
+        top.appendChild(document.createElement('span'));
+      }
+      const progress = document.createElement('span');
+      progress.className = 'text-xs font-semibold uppercase tracking-wider text-mist';
+      progress.textContent = 'Etapa ' + state.step + ' de 3';
+      top.appendChild(progress);
+      box.appendChild(top);
+
+      const h = document.createElement('h2');
+      h.className = 'text-2xl sm:text-3xl font-extrabold text-snow text-center mb-8';
+      h.textContent = cfg.question;
+      box.appendChild(h);
+
+      const grid = document.createElement('div');
+      grid.className = 'grid gap-4 max-w-3xl mx-auto ' + cfg.cols;
+      cfg.options.forEach(o => {
+        const btn = makeButton(WIZ_OPT_CLASS, '', () => { o.pick(); state.step++; renderWizard(); });
+        btn.innerHTML = '<i class="fa-solid ' + o.icon + ' text-2xl text-mist"></i><span>' + esc(o.label) + '</span>' +
+          (o.sub ? '<span class="text-xs font-medium text-mist">' + esc(o.sub) + '</span>' : '');
+        grid.appendChild(btn);
+      });
+      box.appendChild(grid);
+      if (state.step === 1) {
+        const first = grid.querySelector('button');
+        if (first) first.focus({ preventScroll: true });
+      }
+      window.scrollTo({ top: 0 });
+    }
+
+    function goBack() {
+      if (state.step > 1) { state.step--; renderWizard(); }
     }
 
     // ---------- Copiar link ----------
@@ -466,7 +540,7 @@
     // ---------- Inicialização ----------
     function showError(err) {
       console.error(err);
-      $('simulados-container').innerHTML =
+      $('wizard').innerHTML =
         '<div class="text-center py-16 bg-panel rounded-2xl border border-mist/20 shadow-sm">' +
           '<h3 class="text-lg font-bold text-snow mb-1">Não foi possível carregar os simulados</h3>' +
           '<p class="text-sm text-mist max-w-md mx-auto">' + esc(err && err.message ? err.message : err) + '</p>' +
@@ -481,7 +555,7 @@
         $('stat-simulados').textContent = rows.filter(r => r.url).length;
         $('stat-series').textContent = groups.length;
         setupFilters();
-        render();
+        renderWizard();
       } catch (err) {
         showError(err);
       }
