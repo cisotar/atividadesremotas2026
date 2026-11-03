@@ -42,3 +42,7 @@
 | 12.11 | Dia #5 | 2ª Série B | Novotec | Simulado | Processos e Redes | https://forms.gle/L46gEZdB5dHQbf947 |
 | 12.11 | Dia #5 | 2ª Série C | Novotec | Simulado | Oratória e Artes e Mídias | https://forms.gle/fNRryg7tuGk9wJXy9 |
 | 13.11 | Dia #6 | 2ª Série | Regular | Simulado | Educação Física | https://forms.gle/eQo3FTtEqYRSLpiq9 |
+| 10.11 | Dia #3 | 3ª Série | Regular | Simulado | Química | https://forms.gle/jdJykpR9Jbn5TboU6 |
+| 11.11 | Dia #4 | 3ª Série | Regular | Simulado | Física | https://forms.gle/dViv92sVVgWKGM6X9 |
+| 12.11 | Dia #5 | 3ª Série | Regular | Simulado | Biologia | https://forms.gle/b2YvcMppRE7Vpv9TA |
+| 13.11 | Dia #6 | 3ª Série | Regular | Simulado | Matemática | https://forms.gle/Jg67GYPNvL7Aqauv8 |
